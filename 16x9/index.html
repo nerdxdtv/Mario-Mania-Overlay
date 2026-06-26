@@ -131,7 +131,7 @@ html,body{
   line-height:1.05;
 }
 
-/* SCHEDULE */
+/* SCHEDULE - styled like older LIVE / UP NEXT / AFTER THAT overlay */
 
 #schedule{
   position:absolute;
@@ -142,32 +142,72 @@ html,body{
   z-index:5;
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
-  gap:10px;
+  gap:12px;
 }
 
 .card{
+  position:relative;
   overflow:hidden;
   border-radius:16px;
+  padding:12px 16px;
+  box-sizing:border-box;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+  backdrop-filter:blur(2px);
+}
+
+.card.now{
+  background:#f73435;
+  color:#fff;
+}
+
+.card.next{
+  background:#fdd324;
+  color:#111;
+}
+
+.card.later{
+  background:#ffffff;
+  color:#111;
+}
+
+.card-content{
+  width:100%;
+  height:100%;
+  overflow:hidden;
 }
 
 .label{
-  height:50px;
+  height:auto;
   display:flex;
   align-items:center;
-  padding:0 20px;
+  gap:8px;
+  padding:0;
+  margin:0 0 6px 0;
   box-sizing:border-box;
-  font-size:35px;
+  font-size:13px;
+  line-height:1;
   font-weight:900;
+  letter-spacing:.08em;
   text-transform:uppercase;
+  opacity:.96;
+}
+
+.label::after{
+  content:"";
+  display:inline-flex;
+  width:fit-content;
+  min-width:0;
+  height:0;
 }
 
 .title{
-  height:47px;
-  display:flex;
-  align-items:center;
-  padding:0 20px;
+  height:auto;
+  display:block;
+  padding:0;
+  margin:0 0 5px 0;
   box-sizing:border-box;
-  font-size:32px;
+  font-size:29px;
+  line-height:1;
   font-weight:900;
   text-transform:uppercase;
   white-space:nowrap;
@@ -176,33 +216,55 @@ html,body{
 }
 
 .sub{
-  height:23px;
+  height:auto;
   display:flex;
   align-items:center;
-  padding:0 20px 4px;
+  gap:8px;
+  padding:0;
+  margin:0;
   box-sizing:border-box;
   font-size:14px;
-  font-weight:900;
+  line-height:1.1;
+  font-weight:800;
   text-transform:uppercase;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  opacity:.94;
+}
+
+.meta-pill{
+  display:inline-flex;
+  align-items:center;
+  max-width:100%;
+  padding:3px 9px;
+  border-radius:999px;
+  background:rgba(0,0,0,.18);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
-.now .label{background:#e43027}
-.now .title,.now .sub{background:rgba(130,43,36,.82)}
-
-.next .label{background:#f5cf14}
-.next .title,.next .sub{background:rgba(119,134,49,.82)}
-
-.later .label{
-  background:#f5f7ef;
-  color:#111;
+.next .meta-pill,
+.later .meta-pill{
+  background:rgba(0,0,0,.10);
 }
 
-.later .title,.later .sub{
-  background:rgba(220,225,218,.82);
-  color:#15211e;
+.slide-pop{
+  animation:scheduleSlide 520ms cubic-bezier(.22,.95,.36,1);
+}
+
+@keyframes scheduleSlide{
+  0%{
+    transform:translateX(22px);
+    opacity:0;
+    filter:blur(2px);
+  }
+  100%{
+    transform:translateX(0);
+    opacity:1;
+    filter:blur(0);
+  }
 }
 </style>
 </head>
@@ -210,7 +272,7 @@ html,body{
 <body>
 <div id="fit">
   <main id="stage">
-    <img id="frame" src="../assets/mmm27-16x9v2.png" alt="">
+    <img id="frame" src="../assets/mmm27-16x9.png" alt="">
 
     <div id="clock" class="live">Loading...</div>
     <div id="amount" class="live">$0.00</div>
@@ -227,21 +289,27 @@ html,body{
 
     <section id="schedule">
       <article class="card now" id="c0">
-        <div class="label">Now</div>
-        <div class="title">Loading...</div>
-        <div class="sub"></div>
+        <div class="card-content">
+          <div class="label">LIVE</div>
+          <div class="title">Loading...</div>
+          <div class="sub"></div>
+        </div>
       </article>
 
       <article class="card next" id="c1">
-        <div class="label">Next</div>
-        <div class="title">Loading...</div>
-        <div class="sub"></div>
+        <div class="card-content">
+          <div class="label">UP NEXT</div>
+          <div class="title">Loading...</div>
+          <div class="sub"></div>
+        </div>
       </article>
 
       <article class="card later" id="c2">
-        <div class="label">Later</div>
-        <div class="title">Loading...</div>
-        <div class="sub"></div>
+        <div class="card-content">
+          <div class="label">AFTER THAT</div>
+          <div class="title">Loading...</div>
+          <div class="sub"></div>
+        </div>
       </article>
     </section>
   </main>
@@ -387,9 +455,9 @@ function getCards(){
   const now=new Date();
 
   if(!a.length)return [
-    ["Now",null],
-    ["Next",null],
-    ["Later",null]
+    ["LIVE",null],
+    ["UP NEXT",null],
+    ["AFTER THAT",null]
   ];
 
   const i=a.findIndex(x=>now>=x._s && now<x._e);
@@ -397,9 +465,9 @@ function getCards(){
   if(i>=0){
     const pool=a.slice(i+2);
     return [
-      ["Now",a[i]],
-      ["Next",a[i+1]||null],
-      ["Later",pool.length?pool[laterCursor%pool.length]:null]
+      ["LIVE",a[i]],
+      ["UP NEXT",a[i+1]||null],
+      ["AFTER THAT",pool.length?pool[laterCursor%pool.length]:null]
     ];
   }
 
@@ -408,28 +476,42 @@ function getCards(){
   if(upcoming.length){
     const pool=upcoming.slice(2);
     return [
-      ["Soon",upcoming[0]],
-      ["Next",upcoming[1]||null],
-      ["Later",pool.length?pool[laterCursor%pool.length]:(upcoming[2]||null)]
+      ["SOON",upcoming[0]],
+      ["UP NEXT",upcoming[1]||null],
+      ["AFTER THAT",pool.length?pool[laterCursor%pool.length]:(upcoming[2]||null)]
     ];
   }
 
   return [
-    ["Done",a[a.length-1]],
-    ["Next",null],
-    ["Later",null]
+    ["DONE",a[a.length-1]],
+    ["UP NEXT",null],
+    ["AFTER THAT",null]
   ];
 }
 
 function renderCard(id,label,item){
   const e=$("c"+id);
-  e.querySelector(".label").textContent=label;
-  e.querySelector(".title").textContent=item?(item.title||"Untitled Game"):"Schedule Pending";
+  const content=e.querySelector(".card-content");
+  const labelEl=e.querySelector(".label");
+  const titleEl=e.querySelector(".title");
+  const subEl=e.querySelector(".sub");
 
-  const streamer=item?(item.streamer||item.host||""):"";
-  e.querySelector(".sub").textContent=item
-    ? streamer ? `${shortTime(item)} · ${streamer}` : shortTime(item)
-    : "";
+  labelEl.textContent=label;
+  titleEl.textContent=item?(item.title||"Untitled Game"):"Schedule Pending";
+
+  if(item){
+    const streamer=item.streamer||item.host||"";
+    const time=shortTime(item);
+    subEl.innerHTML = streamer
+      ? `<span class="meta-pill">${time}</span><span class="meta-pill">${streamer}</span>`
+      : `<span class="meta-pill">${time}</span>`;
+  }else{
+    subEl.innerHTML="";
+  }
+
+  content.classList.remove("slide-pop");
+  void content.offsetWidth;
+  content.classList.add("slide-pop");
 }
 
 function renderSchedule(){
