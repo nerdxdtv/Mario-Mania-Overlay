@@ -73,38 +73,65 @@ html,body{
   letter-spacing:-1.5px;
 }
 
+/* IMAGE ROTATOR */
+
 #rotator{
+  position:absolute;
   left:30px;
   top:605px;
   width:520px;
   height:185px;
-  display:flex;
+  z-index:5;
+  overflow:hidden;
+  background:#000;
+  display:grid;
+  place-items:center;
+}
+
+#rotatorImg{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+#rotatorFallback{
+  display:none;
+  width:100%;
+  height:100%;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   text-align:center;
   padding:18px;
   box-sizing:border-box;
+  font-weight:900;
+  text-shadow:
+    4px 4px 0 #000,
+    -2px 2px 0 #000,
+    2px -2px 0 #000;
 }
 
-#rotator .kicker{
+#rotatorFallback .kicker{
   font-size:19px;
   text-transform:uppercase;
   margin-bottom:8px;
 }
 
-#rotator .headline{
+#rotatorFallback .headline{
   color:#ffe936;
   font-size:36px;
   line-height:.95;
   text-transform:uppercase;
 }
 
-#rotator .body{
+#rotatorFallback .body{
   margin-top:10px;
   font-size:20px;
   line-height:1.05;
 }
+
+/* SCHEDULE */
 
 #schedule{
   position:absolute;
@@ -188,10 +215,14 @@ html,body{
     <div id="clock" class="live">Loading...</div>
     <div id="amount" class="live">$0.00</div>
 
-    <section id="rotator" class="live">
-      <div class="kicker">Benefitting</div>
-      <div class="headline">March of Dimes</div>
-      <div class="body">Every donation helps support moms and babies.</div>
+    <section id="rotator">
+      <img id="rotatorImg" src="../assets/rotator-march-of-dimes.png" alt="">
+
+      <div id="rotatorFallback">
+        <div class="kicker">Benefitting</div>
+        <div class="headline">March of Dimes</div>
+        <div class="body">Every donation helps support moms and babies.</div>
+      </div>
     </section>
 
     <section id="schedule">
@@ -244,16 +275,19 @@ const demoSchedule=[
 
 const demoRotator=[
   {
+    image:"../assets/rotator-march-of-dimes.png",
     kicker:"Benefitting",
     headline:"March of Dimes",
     body:"Every donation helps support moms and babies."
   },
   {
+    image:"../assets/rotator-merch.png",
     kicker:"Merch",
     headline:"Mario Mania Gear",
     body:"Grab the official event shirt at mariomaniamarathon.com."
   },
   {
+    image:"../assets/rotator-donate.png",
     kicker:"Donate",
     headline:"Support the Event",
     body:"Every dollar helps us reach the campaign goal."
@@ -402,12 +436,36 @@ function renderSchedule(){
   getCards().forEach((c,i)=>renderCard(i,c[0],c[1]));
 }
 
+function setFallbackText(item){
+  document.querySelector("#rotatorFallback .kicker").textContent=item.kicker||"";
+  document.querySelector("#rotatorFallback .headline").textContent=item.headline||"";
+  document.querySelector("#rotatorFallback .body").textContent=item.body||"";
+}
+
 function renderRotator(){
   const item=rotator[rotatorCursor%rotator.length]||demoRotator[0];
+  const img=$("rotatorImg");
+  const fallback=$("rotatorFallback");
 
-  document.querySelector("#rotator .kicker").textContent=item.kicker||"";
-  document.querySelector("#rotator .headline").textContent=item.headline||"";
-  document.querySelector("#rotator .body").textContent=item.body||"";
+  setFallbackText(item);
+
+  if(!item.image){
+    img.style.display="none";
+    fallback.style.display="flex";
+    return;
+  }
+
+  img.onload=function(){
+    img.style.display="block";
+    fallback.style.display="none";
+  };
+
+  img.onerror=function(){
+    img.style.display="none";
+    fallback.style.display="flex";
+  };
+
+  img.src=item.image;
 }
 
 fit();
