@@ -3,99 +3,218 @@
 <head>
 <meta charset="utf-8">
 <title>Mario Mania 16x9 Overlay</title>
+
 <style>
-html,body{margin:0;background:transparent;overflow:hidden}
-#mmm,#mmm *{box-sizing:border-box}
-#mmm{--red:#e43027;--yel:#f5cf14;--blu:#0078d7;position:fixed;inset:0;width:100vw;height:100vh;background:transparent;font-family:Arial,Helvetica,sans-serif;color:white}
-#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center;background:transparent}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:transparent;
+  overflow:hidden;
+  font-family:Arial,Helvetica,sans-serif;
+}
 
-.bgL{position:absolute;left:-80px;top:-20px;width:610px;height:790px;background:linear-gradient(#087b7e,#045a5b);clip-path:polygon(0 0,100% 0,100% 74%,0 82%);z-index:0}
-.bgB{position:absolute;left:0;bottom:0;width:100%;height:275px;background:linear-gradient(#0a7e7e,#025454);z-index:1;overflow:hidden}
-.bgB:before{content:"";position:absolute;inset:0;opacity:.15;background-image:linear-gradient(45deg,rgba(255,255,255,.3) 25%,transparent 25%),linear-gradient(-45deg,rgba(255,255,255,.3) 25%,transparent 25%);background-size:58px 58px;background-position:0 0,29px 29px}
+#fit{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  background:transparent;
+}
 
-.rails{position:absolute;left:-60px;width:2100px;height:80px;z-index:12;pointer-events:none;transform:rotate(-3deg)}
-.rails.top{top:-14px}.rails.bot{bottom:4px}
-.r{position:absolute;left:0;width:100%;height:5px;opacity:.95}
-.r.red{top:18px;background:var(--red)}.r.blue{top:39px;background:var(--blu)}.r.yellow{top:60px;background:var(--yel)}.r.white{top:72px;background:white}
+#stage{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:1920px;
+  height:1080px;
+  transform-origin:center;
+  background:transparent;
+  color:white;
+}
 
-.head{position:absolute;left:560px;top:8px;width:1330px;height:34px;background:#000;display:flex;align-items:center;padding-left:18px;z-index:20;font-size:24px;font-weight:900;letter-spacing:.5px}
-.clock{position:absolute;right:10px;top:8px;min-width:260px;height:34px;background:#000;color:#ffe936;display:flex;align-items:center;justify-content:center;padding:0 14px;z-index:21;font-size:22px;font-weight:900}
+#frame{
+  position:absolute;
+  inset:0;
+  width:1920px;
+  height:1080px;
+  object-fit:contain;
+  z-index:1;
+  pointer-events:none;
+}
 
-.hole{position:absolute;background:transparent;z-index:8;pointer-events:none;border:2px solid rgba(255,255,255,.2);box-shadow:0 0 0 5px rgba(0,0,0,.45)}
-.cam{left:30px;top:50px;width:520px;height:410px}
-.game{left:560px;top:50px;width:1330px;height:760px}
+.live{
+  position:absolute;
+  z-index:5;
+  font-weight:900;
+  text-shadow:
+    4px 4px 0 #000,
+    -2px 2px 0 #000,
+    2px -2px 0 #000;
+}
 
-.name{position:absolute;left:30px;top:472px;width:520px;height:110px;background:linear-gradient(90deg,rgba(1,28,31,.96),rgba(15,25,26,.92));border-radius:55px;z-index:10;display:flex;align-items:center;padding:0 28px;overflow:hidden}
-.name:after{content:"";position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(255,255,255,.08) 8%,transparent 8%),linear-gradient(0deg,rgba(255,255,255,.08) 8%,transparent 8%);background-size:34px 34px;opacity:.28}
-.badge{width:76px;height:76px;min-width:76px;border-radius:50%;background:var(--red);display:grid;place-items:center;margin-right:24px;z-index:2;font-size:42px;font-weight:900}
-.handle{font-size:52px;line-height:1;font-weight:900;text-shadow:4px 4px 0 #000,-2px 2px 0 #000,2px -2px 0 #000;z-index:2}
+#clock{
+  right:22px;
+  top:8px;
+  width:330px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#ffe936;
+  font-size:22px;
+  letter-spacing:.5px;
+}
 
-.charity{position:absolute;left:30px;top:605px;width:520px;height:185px;background:#000;z-index:10;display:grid;place-items:center;text-align:center;padding:18px}
-.small{font-size:19px;font-weight:900;text-transform:uppercase;margin-bottom:5px}
-.mod{color:#7936ff;font-size:50px;font-weight:900;line-height:.9}
-.mod2{color:#7936ff;font-size:20px;font-weight:900;text-transform:uppercase;margin-top:5px}
+#amount{
+  left:76px;
+  bottom:82px;
+  width:270px;
+  font-size:52px;
+  letter-spacing:-1.5px;
+}
 
-.donate{position:absolute;left:20px;bottom:42px;width:340px;height:105px;z-index:20}
-.pill{height:66px;background:rgba(0,0,0,.42);border-radius:34px;display:flex;align-items:center}
-.coin{width:48px;height:48px;min-width:48px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff06d,#ffb300 45%,#e78400 72%);border:4px solid #281800;display:grid;place-items:center;margin-left:-4px;margin-right:8px;color:#3a2100;font-weight:900;font-size:28px}
-.amt{font-size:52px;font-weight:900;letter-spacing:-1.5px;text-shadow:4px 4px 0 #000,-2px 2px 0 #000,2px -2px 0 #000}
-.dlab{margin-top:2px;margin-left:40px;font-size:19px;font-weight:900;text-transform:uppercase;text-shadow:2px 2px 0 #000}
+#rotator{
+  left:30px;
+  top:605px;
+  width:520px;
+  height:185px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:18px;
+  box-sizing:border-box;
+}
 
-.sch{position:absolute;left:380px;bottom:35px;width:1275px;height:120px;z-index:20;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.card{border-radius:16px;overflow:hidden;background:rgba(255,255,255,.94);box-shadow:0 0 0 5px rgba(255,255,255,.12)}
-.lab{height:50px;display:flex;align-items:center;padding:0 20px;font-size:35px;font-weight:900;text-transform:uppercase}
-.title{height:47px;display:flex;align-items:center;padding:0 20px;font-size:32px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sub{height:23px;display:flex;align-items:center;padding:0 20px 4px;font-size:14px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.now .lab{background:var(--red)}.now .title,.now .sub{background:rgba(130,43,36,.82)}
-.next .lab{background:var(--yel)}.next .title,.next .sub{background:rgba(119,134,49,.82)}
-.later .lab{background:#f5f7ef;color:#111}.later .title,.later .sub{background:rgba(220,225,218,.82);color:#15211e}
+#rotator .kicker{
+  font-size:19px;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
 
-.logo{position:absolute;right:25px;bottom:28px;width:230px;height:105px;z-index:25;display:grid;place-items:center;text-align:right;font-size:30px;font-weight:900;line-height:.85;text-shadow:3px 3px 0 #000}
-.tag{position:absolute;right:36px;bottom:5px;z-index:25;font-size:23px;font-weight:900;letter-spacing:2px;text-shadow:3px 3px 0 #000}
+#rotator .headline{
+  color:#ffe936;
+  font-size:36px;
+  line-height:.95;
+  text-transform:uppercase;
+}
+
+#rotator .body{
+  margin-top:10px;
+  font-size:20px;
+  line-height:1.05;
+}
+
+#schedule{
+  position:absolute;
+  left:380px;
+  bottom:35px;
+  width:1275px;
+  height:120px;
+  z-index:5;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+}
+
+.card{
+  overflow:hidden;
+  border-radius:16px;
+}
+
+.label{
+  height:50px;
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  box-sizing:border-box;
+  font-size:35px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+.title{
+  height:47px;
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  box-sizing:border-box;
+  font-size:32px;
+  font-weight:900;
+  text-transform:uppercase;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sub{
+  height:23px;
+  display:flex;
+  align-items:center;
+  padding:0 20px 4px;
+  box-sizing:border-box;
+  font-size:14px;
+  font-weight:900;
+  text-transform:uppercase;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.now .label{background:#e43027}
+.now .title,.now .sub{background:rgba(130,43,36,.82)}
+
+.next .label{background:#f5cf14}
+.next .title,.next .sub{background:rgba(119,134,49,.82)}
+
+.later .label{
+  background:#f5f7ef;
+  color:#111;
+}
+
+.later .title,.later .sub{
+  background:rgba(220,225,218,.82);
+  color:#15211e;
+}
 </style>
 </head>
+
 <body>
-<div id="mmm"><main id="stage">
-<div class="bgL"></div><div class="bgB"></div>
-<div class="rails top"><div class="r red"></div><div class="r blue"></div><div class="r yellow"></div></div>
-<div class="rails bot"><div class="r white"></div><div class="r yellow"></div><div class="r red"></div><div class="r blue"></div></div>
+<div id="fit">
+  <main id="stage">
+    <img id="frame" src="../assets/mmm27-16x9.png" alt="">
 
-<div class="head">MARIO MANIA MARATHON 2027</div>
-<div class="clock" id="clock">Loading...</div>
+    <div id="clock" class="live">Loading...</div>
+    <div id="amount" class="live">$0.00</div>
 
-<div class="hole cam"></div>
-<div class="hole game"></div>
+    <section id="rotator" class="live">
+      <div class="kicker">Benefitting</div>
+      <div class="headline">March of Dimes</div>
+      <div class="body">Every donation helps support moms and babies.</div>
+    </section>
 
-<section class="name">
-  <div class="badge">M</div>
-  <div class="handle">@STREAMER</div>
-</section>
+    <section id="schedule">
+      <article class="card now" id="c0">
+        <div class="label">Now</div>
+        <div class="title">Loading...</div>
+        <div class="sub"></div>
+      </article>
 
-<section class="charity">
-  <div>
-    <div class="small">Benefitting</div>
-    <div class="mod">M♡D</div>
-    <div class="mod2">March of Dimes</div>
-  </div>
-</section>
+      <article class="card next" id="c1">
+        <div class="label">Next</div>
+        <div class="title">Loading...</div>
+        <div class="sub"></div>
+      </article>
 
-<section class="donate">
-  <div class="pill">
-    <div class="coin">$</div>
-    <div class="amt" id="amount">$0.00</div>
-  </div>
-  <div class="dlab">to March of Dimes</div>
-</section>
-
-<section class="sch">
-  <article class="card now" id="c0"><div class="lab">Now</div><div class="title">Loading...</div><div class="sub"></div></article>
-  <article class="card next" id="c1"><div class="lab">Next</div><div class="title">Loading...</div><div class="sub"></div></article>
-  <article class="card later" id="c2"><div class="lab">Later</div><div class="title">Loading...</div><div class="sub"></div></article>
-</section>
-
-<div class="logo">MARIO<br>MANIA</div>
-<div class="tag">#MMM2027</div>
-</main></div>
+      <article class="card later" id="c2">
+        <div class="label">Later</div>
+        <div class="title">Loading...</div>
+        <div class="sub"></div>
+      </article>
+    </section>
+  </main>
+</div>
 
 <script>
 (function(){
@@ -103,14 +222,48 @@ const ET="America/New_York";
 const $=id=>document.getElementById(id);
 
 const demoSchedule=[
-{start:"2027-03-12T13:00:00-05:00",end:"2027-03-12T15:00:00-05:00",title:"Super Mario Galaxy",streamer:"NerdXD"},
-{start:"2027-03-12T15:00:00-05:00",end:"2027-03-12T17:00:00-05:00",title:"Super Mario 3D World",streamer:"Streamer Name"},
-{start:"2027-03-12T17:00:00-05:00",end:"2027-03-12T19:00:00-05:00",title:"New Super Mario Bros. U",streamer:"Streamer Name"},
-{start:"2027-03-12T19:00:00-05:00",end:"2027-03-12T21:00:00-05:00",title:"Super Mario Odyssey",streamer:"Streamer Name"}
+  {
+    start:"2027-03-12T13:00:00-05:00",
+    end:"2027-03-12T15:00:00-05:00",
+    title:"Super Mario Galaxy",
+    streamer:"NerdXD"
+  },
+  {
+    start:"2027-03-12T15:00:00-05:00",
+    end:"2027-03-12T17:00:00-05:00",
+    title:"Super Mario 3D World",
+    streamer:"Streamer Name"
+  },
+  {
+    start:"2027-03-12T17:00:00-05:00",
+    end:"2027-03-12T19:00:00-05:00",
+    title:"New Super Mario Bros. U",
+    streamer:"Streamer Name"
+  }
+];
+
+const demoRotator=[
+  {
+    kicker:"Benefitting",
+    headline:"March of Dimes",
+    body:"Every donation helps support moms and babies."
+  },
+  {
+    kicker:"Merch",
+    headline:"Mario Mania Gear",
+    body:"Grab the official event shirt at mariomaniamarathon.com."
+  },
+  {
+    kicker:"Donate",
+    headline:"Support the Event",
+    body:"Every dollar helps us reach the campaign goal."
+  }
 ];
 
 let schedule=demoSchedule;
-let cursor=0;
+let rotator=demoRotator;
+let laterCursor=0;
+let rotatorCursor=0;
 
 function fit(){
   const s=Math.min(innerWidth/1920,innerHeight/1080);
@@ -119,13 +272,29 @@ function fit(){
 
 function clock(){
   const p={};
-  const f=new Intl.DateTimeFormat("en-US",{timeZone:ET,year:"numeric",month:"numeric",day:"numeric",hour:"numeric",minute:"2-digit",hour12:true});
+  const f=new Intl.DateTimeFormat("en-US",{
+    timeZone:ET,
+    year:"numeric",
+    month:"numeric",
+    day:"numeric",
+    hour:"numeric",
+    minute:"2-digit",
+    hour12:true
+  });
+
   f.formatToParts(new Date()).forEach(x=>p[x.type]=x.value);
-  $("clock").textContent=`${p.year}-${+p.month}-${+p.day} ${+p.hour}:${p.minute} ${p.dayPeriod} ET`;
+
+  $("clock").textContent =
+    `${p.year}-${+p.month}-${+p.day} ${+p.hour}:${p.minute} ${p.dayPeriod} ET`;
 }
 
 function money(x){
-  return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(x||0));
+  return new Intl.NumberFormat("en-US",{
+    style:"currency",
+    currency:"USD",
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  }).format(Number(x||0));
 }
 
 async function donation(){
@@ -146,59 +315,122 @@ async function loadSchedule(){
   }catch(e){
     schedule=demoSchedule;
   }
-  render();
+
+  renderSchedule();
+}
+
+async function loadRotator(){
+  try{
+    const r=await fetch("../data/rotator.json?t="+Date.now(),{cache:"no-store"});
+    const j=await r.json();
+    rotator=Array.isArray(j)?j:(j.rotator||demoRotator);
+  }catch(e){
+    rotator=demoRotator;
+  }
+
+  renderRotator();
 }
 
 function items(){
-  return schedule.map(x=>({...x,_s:new Date(x.start),_e:new Date(x.end)}))
-  .filter(x=>!isNaN(x._s))
-  .sort((a,b)=>a._s-b._s);
+  return schedule
+    .map(x=>({...x,_s:new Date(x.start),_e:new Date(x.end)}))
+    .filter(x=>!isNaN(x._s))
+    .sort((a,b)=>a._s-b._s);
 }
 
 function shortTime(x){
   if(!x)return "";
-  return new Intl.DateTimeFormat("en-US",{timeZone:ET,hour:"numeric",minute:"2-digit",hour12:true}).format(x._s);
+  return new Intl.DateTimeFormat("en-US",{
+    timeZone:ET,
+    hour:"numeric",
+    minute:"2-digit",
+    hour12:true
+  }).format(x._s);
 }
 
-function cards(){
-  const a=items(),now=new Date();
-  if(!a.length)return [["Now",null],["Next",null],["Later",null]];
+function getCards(){
+  const a=items();
+  const now=new Date();
 
-  const i=a.findIndex(x=>now>=x._s&&now<x._e);
+  if(!a.length)return [
+    ["Now",null],
+    ["Next",null],
+    ["Later",null]
+  ];
+
+  const i=a.findIndex(x=>now>=x._s && now<x._e);
 
   if(i>=0){
     const pool=a.slice(i+2);
-    return [["Now",a[i]],["Next",a[i+1]||null],["Later",pool.length?pool[cursor%pool.length]:null]];
+    return [
+      ["Now",a[i]],
+      ["Next",a[i+1]||null],
+      ["Later",pool.length?pool[laterCursor%pool.length]:null]
+    ];
   }
 
-  const up=a.filter(x=>x._s>now);
-  if(up.length){
-    const pool=up.slice(2);
-    return [["Soon",up[0]],["Next",up[1]||null],["Later",pool.length?pool[cursor%pool.length]:(up[2]||null)]];
+  const upcoming=a.filter(x=>x._s>now);
+
+  if(upcoming.length){
+    const pool=upcoming.slice(2);
+    return [
+      ["Soon",upcoming[0]],
+      ["Next",upcoming[1]||null],
+      ["Later",pool.length?pool[laterCursor%pool.length]:(upcoming[2]||null)]
+    ];
   }
 
-  return [["Done",a[a.length-1]],["Next",null],["Later",null]];
+  return [
+    ["Done",a[a.length-1]],
+    ["Next",null],
+    ["Later",null]
+  ];
 }
 
-function card(id,label,item){
+function renderCard(id,label,item){
   const e=$("c"+id);
-  e.querySelector(".lab").textContent=label;
+  e.querySelector(".label").textContent=label;
   e.querySelector(".title").textContent=item?(item.title||"Untitled Game"):"Schedule Pending";
-  e.querySelector(".sub").textContent=item?((item.streamer||item.host)?`${shortTime(item)} · ${item.streamer||item.host}`:shortTime(item)):"";
+
+  const streamer=item?(item.streamer||item.host||""):"";
+  e.querySelector(".sub").textContent=item
+    ? streamer ? `${shortTime(item)} · ${streamer}` : shortTime(item)
+    : "";
 }
 
-function render(){
-  cards().forEach((c,i)=>card(i,c[0],c[1]));
+function renderSchedule(){
+  getCards().forEach((c,i)=>renderCard(i,c[0],c[1]));
+}
+
+function renderRotator(){
+  const item=rotator[rotatorCursor%rotator.length]||demoRotator[0];
+
+  document.querySelector("#rotator .kicker").textContent=item.kicker||"";
+  document.querySelector("#rotator .headline").textContent=item.headline||"";
+  document.querySelector("#rotator .body").textContent=item.body||"";
 }
 
 fit();
 clock();
 donation();
 loadSchedule();
+loadRotator();
 
 setInterval(clock,1000);
 setInterval(donation,15000);
-setInterval(()=>{cursor++;render()},10000);
+setInterval(loadSchedule,60000);
+setInterval(loadRotator,60000);
+
+setInterval(()=>{
+  laterCursor++;
+  renderSchedule();
+},10000);
+
+setInterval(()=>{
+  rotatorCursor++;
+  renderRotator();
+},12000);
+
 addEventListener("resize",fit);
 })();
 </script>
