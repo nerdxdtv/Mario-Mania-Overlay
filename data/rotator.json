@@ -1,14 +1,20 @@
 [
   {
-    "image": "../assets/rotator-march-of-dimes.png"
+    "image": "../assets/rotator-march-of-dimes.png",
+    "kicker": "Benefitting",
+    "headline": "March of Dimes",
+    "body": "Every donation helps support moms and babies."
   },
   {
-    "image": "../assets/rotator-merch.png"
+    "image": "../assets/rotator-merch.png",
+    "kicker": "Merch",
+    "headline": "Mario Mania Gear",
+    "body": "Grab the official event shirt at mariomaniamarathon.com."
   },
   {
-    "image": "../assets/rotator-donate.png"
-  },
-  {
-    "image": "../assets/rotator-schedule.png"
+    "image": "../assets/rotator-donate.png",
+    "kicker": "Donate",
+    "headline": "Support the Event",
+    "body": "Every dollar helps us reach the campaign goal."
   }
 ]
