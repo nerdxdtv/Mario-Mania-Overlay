@@ -44,15 +44,15 @@ body {
 /*
  * Temporary test element.
  *
- * This should appear inside the black panel
- * on the lower-left side of the overlay.
+ * This is positioned inside the lowest box
+ * beneath the participant username area.
  */
 .test-label {
     position: absolute;
     left: 10px;
-    top: 590px;
+    top: 705px;
     width: 535px;
-    height: 105px;
+    height: 109px;
 
     display: flex;
     align-items: center;
