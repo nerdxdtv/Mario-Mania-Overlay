@@ -15,8 +15,8 @@
 
     const dateFormatter = new Intl.DateTimeFormat("en-US", {
         timeZone: EASTERN_TIME_ZONE,
-        weekday: "short",
-        month: "short",
+        year: "numeric",
+        month: "numeric",
         day: "numeric"
     });
 
@@ -24,17 +24,32 @@
         timeZone: EASTERN_TIME_ZONE,
         hour: "numeric",
         minute: "2-digit",
+        hour12: true,
         timeZoneName: "short"
     });
+
+    function getPart(parts, type) {
+        const matchingPart = parts.find((part) => part.type === type);
+        return matchingPart ? matchingPart.value : "";
+    }
 
     function updateClock() {
         const now = new Date();
 
-        const dateText = dateFormatter.format(now);
-        const timeText = timeFormatter.format(now);
+        const dateParts = dateFormatter.formatToParts(now);
+        const timeParts = timeFormatter.formatToParts(now);
+
+        const year = getPart(dateParts, "year");
+        const month = getPart(dateParts, "month");
+        const day = getPart(dateParts, "day");
+
+        const hour = getPart(timeParts, "hour");
+        const minute = getPart(timeParts, "minute");
+        const dayPeriod = getPart(timeParts, "dayPeriod");
+        const timeZone = getPart(timeParts, "timeZoneName");
 
         clockElement.textContent =
-            `${dateText} • ${timeText}`;
+            `${year}-${month}-${day} ${hour}:${minute} ${dayPeriod} ${timeZone}`;
     }
 
     updateClock();
