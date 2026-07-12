@@ -26,7 +26,7 @@ body {
 }
 
 /*
- * The base PNG frame.
+ * Base overlay artwork.
  */
 .overlay-frame {
     position: absolute;
@@ -42,27 +42,36 @@ body {
 }
 
 /*
- * Temporary test element.
+ * Eastern date and time.
  *
- * This is positioned inside the lowest box
- * beneath the participant username area.
+ * Positioned inside the small black panel
+ * at the upper-right corner.
  */
-.test-label {
+.event-clock {
     position: absolute;
-    left: 10px;
-    top: 705px;
-    width: 535px;
-    height: 109px;
+    left: 1556px;
+    top: 10px;
+    width: 353px;
+    height: 33px;
+
+    box-sizing: border-box;
+    padding: 0 8px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    color: white;
-    font-family: Arial, sans-serif;
-    font-size: 42px;
+    color: #ffffff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 19px;
     font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.3px;
     text-align: center;
+    text-transform: uppercase;
+
+    white-space: nowrap;
+    overflow: hidden;
 
     z-index: 10;
 }
