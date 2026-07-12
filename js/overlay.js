@@ -199,11 +199,16 @@
 
     /*
      * ------------------------------------------------------------
-     * DONATION TOTAL
+     * LIVE TILTIFY DONATION TOTAL
      * ------------------------------------------------------------
      */
 
-    const DONATION_DATA_URL = "../data/donations.json";
+    const DONATION_WORKER_URL =
+        "https://mario-mania-donations.kodychristian.workers.dev";
+
+    const DONATION_FALLBACK_URL =
+        "../data/donations.json";
+
     const DONATION_REFRESH_INTERVAL = 15000;
 
     const donationTotalElement =
@@ -218,51 +223,76 @@
         }).format(total);
     }
 
+    async function fetchDonationData(url) {
+        const separator = url.includes("?") ? "&" : "?";
+        const cacheBuster = Date.now();
+
+        const response = await fetch(
+            `${url}${separator}v=${cacheBuster}`,
+            {
+                cache: "no-store"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Donation request returned status ${response.status}.`
+            );
+        }
+
+        const donationData = await response.json();
+        const total = Number(donationData.total);
+
+        if (!Number.isFinite(total)) {
+            throw new Error(
+                "Donation total is missing or invalid."
+            );
+        }
+
+        return {
+            total,
+            currency: donationData.currency || "USD"
+        };
+    }
+
     async function updateDonationTotal() {
         if (!donationTotalElement) {
             return;
         }
 
+        let donationData;
+
         try {
-            /*
-             * The timestamp prevents GitHub Pages and OBS
-             * from returning an older cached JSON file.
-             */
-            const cacheBuster = Date.now();
-
-            const response = await fetch(
-                `${DONATION_DATA_URL}?v=${cacheBuster}`,
-                {
-                    cache: "no-store"
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    `Donation data returned status ${response.status}`
-                );
-            }
-
-            const donationData = await response.json();
-            const total = Number(donationData.total);
-
-            if (!Number.isFinite(total)) {
-                throw new Error(
-                    "Donation total is missing or invalid."
-                );
-            }
-
-            donationTotalElement.textContent =
-                formatDonationTotal(
-                    total,
-                    donationData.currency
-                );
-        } catch (error) {
+            donationData =
+                await fetchDonationData(DONATION_WORKER_URL);
+        } catch (workerError) {
             console.error(
-                "Unable to update donation total.",
-                error
+                "Unable to load live Tiltify total. Trying local fallback.",
+                workerError
             );
+
+            try {
+                donationData =
+                    await fetchDonationData(DONATION_FALLBACK_URL);
+            } catch (fallbackError) {
+                console.error(
+                    "Unable to load fallback donation total.",
+                    fallbackError
+                );
+
+                /*
+                 * Keep the last successfully displayed value
+                 * rather than replacing it with an error.
+                 */
+                return;
+            }
         }
+
+        donationTotalElement.textContent =
+            formatDonationTotal(
+                donationData.total,
+                donationData.currency
+            );
     }
 
     updateDonationTotal();
