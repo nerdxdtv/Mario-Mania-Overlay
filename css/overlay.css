@@ -1,5 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
 
+@font-face {
+    font-family: "Museo Sans";
+    src: url("../assets/fonts/MuseoSans-900.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+}
+
 /*
  * Mario Mania Marathon 2027
  * Shared overlay styling
@@ -126,14 +134,8 @@ body {
 /*
  * Donation total.
  *
- * The supplied coordinates represent the
- * upper-left corner of the text area.
- */
-/*
- * Donation total.
- *
  * Positioned so the text baseline sits approximately
- * 67 pixels above the bottom edge of the 1080p canvas.
+ * 67 pixels above the bottom edge of the canvas.
  */
 .donation-total {
     position: absolute;
@@ -150,6 +152,7 @@ body {
     color: #ffffff;
 
     font-family:
+        "Museo Sans",
         "Arial Black",
         Arial,
         Helvetica,
