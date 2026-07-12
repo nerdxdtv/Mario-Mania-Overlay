@@ -44,6 +44,45 @@ body {
 }
 
 /*
+ * Informational image rotator.
+ *
+ * This occupies the lowest box in the left column.
+ */
+.info-rotator {
+    position: absolute;
+    left: 8px;
+    top: 704px;
+    width: 538px;
+    height: 110px;
+
+    overflow: hidden;
+    border-radius: 14px;
+
+    z-index: 10;
+}
+
+.rotator-image {
+    width: 538px;
+    height: 110px;
+    display: block;
+
+    object-fit: cover;
+
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 700ms;
+    transition-timing-function: ease-in-out;
+
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.rotator-image.is-visible {
+    opacity: 1;
+}
+
+/*
  * Eastern date and time.
  *
  * Positioned inside the small black panel
