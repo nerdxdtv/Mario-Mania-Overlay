@@ -37,34 +37,43 @@ body {
 
 /*
  * Base overlay artwork.
+ *
+ * This sits above the informational rotator,
+ * allowing the PNG artwork to frame or mask it.
  */
 .overlay-frame {
     position: absolute;
     top: 0;
     left: 0;
+
     width: 1920px;
     height: 1080px;
     display: block;
+
     pointer-events: none;
     user-select: none;
     -webkit-user-drag: none;
-    z-index: 1;
+
+    z-index: 10;
 }
 
 /*
  * Informational image rotator.
+ *
+ * This sits underneath the static overlay image.
  */
 .info-rotator {
     position: absolute;
     left: 8px;
     top: 704px;
+
     width: 538px;
     height: 110px;
 
     overflow: hidden;
     border-radius: 0;
 
-    z-index: 10;
+    z-index: 1;
 }
 
 .rotator-image {
@@ -75,6 +84,7 @@ body {
     object-fit: cover;
 
     opacity: 0;
+
     transition-property: opacity;
     transition-duration: 700ms;
     transition-timing-function: ease-in-out;
@@ -90,11 +100,15 @@ body {
 
 /*
  * Eastern date and time.
+ *
+ * This stays above both the static frame
+ * and the informational rotator.
  */
 .event-clock {
     position: absolute;
     left: 1556px;
     top: 10px;
+
     width: 353px;
     height: 33px;
 
@@ -128,14 +142,14 @@ body {
     white-space: nowrap;
     overflow: hidden;
 
-    z-index: 10;
+    z-index: 20;
 }
 
 /*
  * Donation total.
  *
- * Positioned so the text baseline sits approximately
- * 67 pixels above the bottom edge of the canvas.
+ * This stays above both the static frame
+ * and the informational rotator.
  */
 .donation-total {
     position: absolute;
@@ -152,7 +166,10 @@ body {
     color: #ffffff;
 
     font-family:
-        "Museo Sans",
+        "MuseoSans900",
+        "Arial Black",
+        Arial,
+        Helvetica,
         sans-serif;
 
     font-size: 48px;
@@ -169,5 +186,5 @@ body {
         2px 2px 0 #000000,
         3px 3px 0 #000000;
 
-    z-index: 10;
+    z-index: 20;
 }
