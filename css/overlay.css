@@ -129,10 +129,16 @@ body {
  * The supplied coordinates represent the
  * upper-left corner of the text area.
  */
+/*
+ * Donation total.
+ *
+ * Positioned so the text baseline sits approximately
+ * 67 pixels above the bottom edge of the 1080p canvas.
+ */
 .donation-total {
     position: absolute;
     left: 69px;
-    top: 973px;
+    top: 970px;
 
     min-width: 240px;
     height: 55px;
@@ -144,7 +150,7 @@ body {
     color: #ffffff;
 
     font-family:
-        Arial Black,
+        "Arial Black",
         Arial,
         Helvetica,
         sans-serif;
@@ -156,11 +162,12 @@ body {
 
     white-space: nowrap;
 
+    -webkit-text-stroke: 3px #000000;
+    paint-order: stroke fill;
+
     text-shadow:
-        3px 3px 0 #000000,
-        -1px -1px 0 #000000,
-        1px -1px 0 #000000,
-        -1px 1px 0 #000000;
+        2px 2px 0 #000000,
+        3px 3px 0 #000000;
 
     z-index: 10;
 }
