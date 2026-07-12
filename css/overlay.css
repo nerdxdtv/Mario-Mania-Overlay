@@ -45,8 +45,6 @@ body {
 
 /*
  * Informational image rotator.
- *
- * This occupies the lowest box in the left column.
  */
 .info-rotator {
     position: absolute;
@@ -84,9 +82,6 @@ body {
 
 /*
  * Eastern date and time.
- *
- * Positioned inside the small black panel
- * at the upper-right corner.
  */
 .event-clock {
     position: absolute;
@@ -124,6 +119,48 @@ body {
 
     white-space: nowrap;
     overflow: hidden;
+
+    z-index: 10;
+}
+
+/*
+ * Donation total.
+ *
+ * The supplied coordinates represent the
+ * upper-left corner of the text area.
+ */
+.donation-total {
+    position: absolute;
+    left: 69px;
+    top: 973px;
+
+    min-width: 240px;
+    height: 55px;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    color: #ffffff;
+
+    font-family:
+        Arial Black,
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -1px;
+
+    white-space: nowrap;
+
+    text-shadow:
+        3px 3px 0 #000000,
+        -1px -1px 0 #000000,
+        1px -1px 0 #000000,
+        -1px 1px 0 #000000;
 
     z-index: 10;
 }
