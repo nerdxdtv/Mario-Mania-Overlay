@@ -95,6 +95,10 @@
     }
 
     async function displaySlide(slide, transitionDuration) {
+        if (!rotatorImage) {
+            return;
+        }
+
         rotatorImage.classList.remove("is-visible");
 
         await wait(transitionDuration);
@@ -192,4 +196,79 @@
     }
 
     startRotator();
+
+    /*
+     * ------------------------------------------------------------
+     * DONATION TOTAL
+     * ------------------------------------------------------------
+     */
+
+    const DONATION_DATA_URL = "../data/donations.json";
+    const DONATION_REFRESH_INTERVAL = 15000;
+
+    const donationTotalElement =
+        document.getElementById("donation-total");
+
+    function formatDonationTotal(total, currency) {
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: currency || "USD",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(total);
+    }
+
+    async function updateDonationTotal() {
+        if (!donationTotalElement) {
+            return;
+        }
+
+        try {
+            /*
+             * The timestamp prevents GitHub Pages and OBS
+             * from returning an older cached JSON file.
+             */
+            const cacheBuster = Date.now();
+
+            const response = await fetch(
+                `${DONATION_DATA_URL}?v=${cacheBuster}`,
+                {
+                    cache: "no-store"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `Donation data returned status ${response.status}`
+                );
+            }
+
+            const donationData = await response.json();
+            const total = Number(donationData.total);
+
+            if (!Number.isFinite(total)) {
+                throw new Error(
+                    "Donation total is missing or invalid."
+                );
+            }
+
+            donationTotalElement.textContent =
+                formatDonationTotal(
+                    total,
+                    donationData.currency
+                );
+        } catch (error) {
+            console.error(
+                "Unable to update donation total.",
+                error
+            );
+        }
+    }
+
+    updateDonationTotal();
+
+    window.setInterval(
+        updateDonationTotal,
+        DONATION_REFRESH_INTERVAL
+    );
 })();
