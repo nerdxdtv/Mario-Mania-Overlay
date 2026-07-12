@@ -1,0 +1,11 @@
+{
+    "defaultDuration": 8000,
+    "transitionDuration": 700,
+    "slides": [
+        {
+            "image": "../assets/rotator/march-of-dimes.png",
+            "alt": "March of Dimes",
+            "duration": 8000
+        }
+    ]
+}
