@@ -25,27 +25,30 @@
         120;
 
     /*
-     * Animation timing.
+     * Shortened temporarily so the animation
+     * is easy to verify in OBS.
      */
     const INITIAL_VIEW_DURATION =
-        10000;
+        5000;
 
     const SLIDE_DURATION =
         900;
 
     const LATER_VIEW_DURATION =
-        8000;
+        5000;
 
     const FADE_DURATION =
         500;
 
     /*
-     * Last year's schedule has ended, so test mode
-     * displays four consecutive historical entries.
+     * Last year's event has ended, so test mode
+     * selects historical entries directly.
      */
-    const TEST_MODE = true;
+    const TEST_MODE =
+        true;
 
-    const TEST_START_INDEX = 0;
+    const TEST_START_INDEX =
+        0;
 
     const scheduleLine =
         document.getElementById("schedule-line");
@@ -56,12 +59,6 @@
 
     let lastScheduleSignature = "";
     let hasLoadedSchedule = false;
-
-    /*
-     * Every new schedule render increments this value.
-     * Older animation loops stop when their version
-     * no longer matches.
-     */
     let animationVersion = 0;
 
     /*
@@ -94,9 +91,29 @@
         );
     }
 
+    async function brieflyWaitForFonts() {
+        if (
+            !document.fonts ||
+            !document.fonts.ready
+        ) {
+            await wait(100);
+            return;
+        }
+
+        /*
+         * OBS can occasionally leave document.fonts.ready
+         * pending for a long time. Continue after 1.2 seconds
+         * even if a webfont request is still unresolved.
+         */
+        await Promise.race([
+            document.fonts.ready.catch(() => {}),
+            wait(1200)
+        ]);
+    }
+
     /*
      * ------------------------------------------------------------
-     * DATE AND TIME HELPERS
+     * DATE HELPERS
      * ------------------------------------------------------------
      */
 
@@ -108,11 +125,6 @@
             return null;
         }
 
-        /*
-         * Expected format:
-         *
-         * 2026-03-27-0800
-         */
         const match = id.match(
             /^(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})$/
         );
@@ -347,7 +359,7 @@
             };
         }
 
-        const firstUpcomingEntry =
+        const upcomingEntry =
             entries.find((entry) => {
                 return (
                     entry.startNumber >
@@ -355,18 +367,16 @@
                 );
             }) || null;
 
-        if (firstUpcomingEntry) {
+        if (upcomingEntry) {
             const upcomingIndex =
-                entries.indexOf(
-                    firstUpcomingEntry
-                );
+                entries.indexOf(upcomingEntry);
 
             return {
                 now:
                     null,
 
                 next:
-                    firstUpcomingEntry,
+                    upcomingEntry,
 
                 after:
                     entries[
@@ -390,7 +400,7 @@
 
     /*
      * ------------------------------------------------------------
-     * ELEMENT CREATION
+     * HTML CREATION
      * ------------------------------------------------------------
      */
 
@@ -508,8 +518,11 @@
     }
 
     /*
-     * Returns the rendered width including margins.
+     * ------------------------------------------------------------
+     * WIDTH MEASUREMENT
+     * ------------------------------------------------------------
      */
+
     function getOuterWidth(element) {
         const styles =
             window.getComputedStyle(element);
@@ -552,16 +565,15 @@
         return total;
     }
 
-    /*
-     * ------------------------------------------------------------
-     * FITTING AND POSITIONING
-     * ------------------------------------------------------------
-     */
-
     function fitAndMeasureTrack(track) {
-        const maximumFontSize = 20;
-        const minimumFontSize = 12;
-        const safetyPadding = 12;
+        const maximumFontSize =
+            20;
+
+        const minimumFontSize =
+            12;
+
+        const safetyPadding =
+            20;
 
         let fontSize =
             maximumFontSize;
@@ -569,8 +581,11 @@
         let children =
             Array.from(track.children);
 
-        let initialGroupWidth = 0;
-        let laterGroupWidth = 0;
+        let initialGroupWidth =
+            0;
+
+        let laterGroupWidth =
+            0;
 
         while (
             fontSize >= minimumFontSize
@@ -578,25 +593,11 @@
             scheduleLine.style.fontSize =
                 `${fontSize}px`;
 
-            /*
-             * Force the browser to recalculate widths.
-             */
             void track.offsetWidth;
 
             children =
                 Array.from(track.children);
 
-            /*
-             * Children:
-             *
-             * 0 NOW
-             * 1 separator
-             * 2 NEXT
-             * 3 separator
-             * 4 AFTER
-             * 5 separator
-             * 6 LATER
-             */
             initialGroupWidth =
                 sumChildWidths(
                     children,
@@ -628,31 +629,41 @@
             fontSize -= 1;
         }
 
-        const firstEntryAndSeparatorWidth =
+        const firstItemAndSeparatorWidth =
             sumChildWidths(
                 children,
                 0,
                 1
             );
 
-        /*
-         * Center NOW / NEXT / AFTER.
-         */
         const initialOffset =
             (
                 scheduleLine.clientWidth -
                 initialGroupWidth
             ) / 2;
 
-        /*
-         * Center NEXT / AFTER / LATER.
-         */
-        const laterOffset =
+        let laterOffset =
             (
                 scheduleLine.clientWidth -
                 laterGroupWidth
             ) / 2 -
-            firstEntryAndSeparatorWidth;
+            firstItemAndSeparatorWidth;
+
+        /*
+         * Guarantee that the motion is visibly noticeable.
+         */
+        if (
+            Math.abs(
+                laterOffset - initialOffset
+            ) < 120
+        ) {
+            laterOffset =
+                initialOffset -
+                Math.max(
+                    firstItemAndSeparatorWidth,
+                    300
+                );
+        }
 
         return {
             initialOffset,
@@ -675,11 +686,6 @@
             version === animationVersion &&
             track.isConnected
         ) {
-            /*
-             * First view:
-             *
-             * NOW | NEXT | AFTER
-             */
             await wait(
                 INITIAL_VIEW_DURATION
             );
@@ -692,7 +698,11 @@
             }
 
             /*
-             * Slide left:
+             * Slide from:
+             *
+             * NOW | NEXT | AFTER
+             *
+             * to:
              *
              * NEXT | AFTER | LATER
              */
@@ -711,9 +721,6 @@
                 return;
             }
 
-            /*
-             * Fade the whole line out.
-             */
             scheduleLine.classList.add(
                 "is-hidden"
             );
@@ -729,9 +736,6 @@
                 return;
             }
 
-            /*
-             * Reset the track while invisible.
-             */
             track.classList.add(
                 "no-transition"
             );
@@ -745,9 +749,6 @@
                 "no-transition"
             );
 
-            /*
-             * Fade the original view back in.
-             */
             scheduleLine.classList.remove(
                 "is-hidden"
             );
@@ -785,7 +786,7 @@
 
         animationVersion += 1;
 
-        const thisAnimationVersion =
+        const currentVersion =
             animationVersion;
 
         scheduleLine.classList.remove(
@@ -850,22 +851,12 @@
 
         hasLoadedSchedule = true;
 
-        /*
-         * Wait for Museo Sans to finish loading
-         * before measuring the text.
-         */
-        if (
-            document.fonts &&
-            document.fonts.ready
-        ) {
-            await document.fonts.ready;
-        }
-
+        await brieflyWaitForFonts();
+        await nextFrame();
         await nextFrame();
 
         if (
-            thisAnimationVersion !==
-                animationVersion ||
+            currentVersion !== animationVersion ||
             !track.isConnected
         ) {
             return;
@@ -880,12 +871,9 @@
         track.style.transform =
             `translateX(${offsets.initialOffset}px)`;
 
-        /*
-         * Apply the starting position without
-         * showing an animation.
-         */
         void track.offsetWidth;
 
+        await nextFrame();
         await nextFrame();
 
         track.classList.remove(
@@ -895,13 +883,13 @@
         runAnimationCycle(
             track,
             offsets,
-            thisAnimationVersion
+            currentVersion
         );
     }
 
     /*
      * ------------------------------------------------------------
-     * FETCH AND REFRESH
+     * FETCHING
      * ------------------------------------------------------------
      */
 
@@ -925,12 +913,12 @@
                 );
             }
 
-            const schedule =
+            const rawSchedule =
                 await response.json();
 
             const normalizedSchedule =
                 normalizeSchedule(
-                    schedule
+                    rawSchedule
                 );
 
             if (
@@ -955,10 +943,6 @@
                 error
             );
 
-            /*
-             * Keep the last successful schedule
-             * visible if a later refresh fails.
-             */
             if (!hasLoadedSchedule) {
                 scheduleLine.textContent =
                     "SCHEDULE TEMPORARILY UNAVAILABLE";
