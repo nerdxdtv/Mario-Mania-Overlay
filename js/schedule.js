@@ -34,8 +34,8 @@
         900;
 
     /*
-     * LATER begins fading in this many milliseconds
-     * after the horizontal slide starts.
+     * LATER begins fading in near the end
+     * of the horizontal movement.
      */
     const LATER_REVEAL_DELAY =
         600;
@@ -46,6 +46,10 @@
     const FADE_DURATION =
         500;
 
+    /*
+     * Last year's schedule has ended, so test mode
+     * selects historical entries directly.
+     */
     const TEST_MODE =
         true;
 
@@ -102,6 +106,10 @@
             return;
         }
 
+        /*
+         * Continue after 1.2 seconds even if OBS
+         * has not resolved the font promise.
+         */
         await Promise.race([
             document.fonts.ready.catch(() => {}),
             wait(1200)
@@ -570,7 +578,7 @@
             12;
 
         const safetyPadding =
-            20;
+            10;
 
         let fontSize =
             maximumFontSize;
@@ -595,6 +603,9 @@
             children =
                 Array.from(track.children);
 
+            /*
+             * NOW | NEXT | AFTER
+             */
             initialGroupWidth =
                 sumChildWidths(
                     children,
@@ -602,6 +613,9 @@
                     4
                 );
 
+            /*
+             * NEXT | AFTER | LATER
+             */
             laterGroupWidth =
                 sumChildWidths(
                     children,
@@ -626,42 +640,24 @@
             fontSize -= 1;
         }
 
-        const firstItemAndSeparatorWidth =
+        /*
+         * The width of:
+         *
+         * NOW entry + first separator
+         *
+         * Moving left by this exact amount makes
+         * NEXT land at the left edge of the bar.
+         */
+        const nowAndSeparatorWidth =
             sumChildWidths(
                 children,
                 0,
                 1
             );
 
-        const initialOffset =
-            (
-                scheduleLine.clientWidth -
-                initialGroupWidth
-            ) / 2;
-
-        let laterOffset =
-            (
-                scheduleLine.clientWidth -
-                laterGroupWidth
-            ) / 2 -
-            firstItemAndSeparatorWidth;
-
-        if (
-            Math.abs(
-                laterOffset - initialOffset
-            ) < 120
-        ) {
-            laterOffset =
-                initialOffset -
-                Math.max(
-                    firstItemAndSeparatorWidth,
-                    300
-                );
-        }
-
         return {
-            initialOffset,
-            laterOffset
+            initialOffset: 0,
+            laterOffset: -nowAndSeparatorWidth
         };
     }
 
@@ -694,7 +690,7 @@
             track.isConnected
         ) {
             /*
-             * Initial view:
+             * Initial left-aligned view:
              *
              * NOW | NEXT | AFTER
              */
@@ -710,15 +706,14 @@
             }
 
             /*
-             * Begin horizontal movement.
+             * Slide left by the entire width of
+             * NOW and its separator.
+             *
+             * The ending view begins with NEXT.
              */
             track.style.transform =
                 `translateX(${offsets.laterOffset}px)`;
 
-            /*
-             * Wait until the slide is nearly finished,
-             * then reveal the final separator and entry.
-             */
             await wait(
                 LATER_REVEAL_DELAY
             );
@@ -730,15 +725,15 @@
                 return;
             }
 
+            /*
+             * Reveal the final separator and LATER entry
+             * as the track approaches its final position.
+             */
             setLaterVisibility(
                 laterPieces,
                 true
             );
 
-            /*
-             * Finish the remaining portion of the slide,
-             * then keep the later view on screen.
-             */
             await wait(
                 Math.max(
                     SLIDE_DURATION -
@@ -756,7 +751,7 @@
             }
 
             /*
-             * Fade the entire schedule away.
+             * Fade the entire schedule out.
              */
             scheduleLine.classList.add(
                 "is-hidden"
@@ -774,7 +769,7 @@
             }
 
             /*
-             * Hide LATER again while the line is invisible.
+             * Hide LATER again while invisible.
              */
             setLaterVisibility(
                 laterPieces,
@@ -782,7 +777,8 @@
             );
 
             /*
-             * Reset the horizontal track without animation.
+             * Reset to the left-aligned NOW position
+             * without animating backward.
              */
             track.classList.add(
                 "no-transition"
@@ -933,6 +929,9 @@
         track.style.transitionDuration =
             `${SLIDE_DURATION}ms`;
 
+        /*
+         * Begin at the left edge of the schedule area.
+         */
         track.style.transform =
             `translateX(${offsets.initialOffset}px)`;
 
