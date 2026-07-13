@@ -1,6 +1,6 @@
 /*
  * Mario Mania Marathon 2027
- * Animated bottom schedule bar
+ * Animated schedule and informational message bar
  */
 
 (function () {
@@ -15,17 +15,23 @@
     const SCHEDULE_URL =
         "https://gist.githubusercontent.com/nerdxdtv/ee4d75e1de028f2d3ab5853a164ce935/raw/47381d77ff7b276442ffe8f7dce41ee843b8428a/schedule.json";
 
+    const MESSAGES_URL =
+        "../data/messages.json";
+
     const EVENT_TIME_ZONE =
         "America/New_York";
 
-    const REFRESH_INTERVAL =
+    const SCHEDULE_REFRESH_INTERVAL =
         15000;
+
+    const MESSAGES_REFRESH_INTERVAL =
+        60000;
 
     const DEFAULT_SLOT_MINUTES =
         120;
 
     /*
-     * Temporary short timing for animation testing.
+     * Schedule animation timing.
      */
     const INITIAL_VIEW_DURATION =
         5000;
@@ -33,21 +39,17 @@
     const SLIDE_DURATION =
         900;
 
-    /*
-     * LATER begins fading in near the end
-     * of the horizontal movement.
-     */
     const LATER_REVEAL_DELAY =
         600;
 
     const LATER_VIEW_DURATION =
         5000;
 
-    const FADE_DURATION =
+    const SCHEDULE_FADE_DURATION =
         500;
 
     /*
-     * Last year's schedule has ended, so test mode
+     * Last year's event has ended, so test mode
      * selects historical entries directly.
      */
     const TEST_MODE =
@@ -62,6 +64,38 @@
     if (!scheduleLine) {
         return;
     }
+
+    const fallbackMessageSettings = {
+        defaultDuration: 5000,
+        transitionDuration: 500,
+        messages: [
+            {
+                text:
+                    "Mario Mania benefits March of Dimes!"
+            },
+            {
+                text:
+                    "...but only because of YOU!"
+            },
+            {
+                text:
+                    "$5 can support newborn screenings through March of Dimes Advocacy.",
+                duration:
+                    6500
+            },
+            {
+                text:
+                    "Donate at MarioManiaMarathon.com"
+            }
+        ]
+    };
+
+    let messageSettings = {
+        ...fallbackMessageSettings,
+        messages: [
+            ...fallbackMessageSettings.messages
+        ]
+    };
 
     let lastScheduleSignature = "";
     let hasLoadedSchedule = false;
@@ -106,14 +140,84 @@
             return;
         }
 
-        /*
-         * Continue after 1.2 seconds even if OBS
-         * has not resolved the font promise.
-         */
         await Promise.race([
             document.fonts.ready.catch(() => {}),
             wait(1200)
         ]);
+    }
+
+    /*
+     * ------------------------------------------------------------
+     * MESSAGE DATA
+     * ------------------------------------------------------------
+     */
+
+    async function refreshMessages() {
+        try {
+            const separator =
+                MESSAGES_URL.includes("?")
+                    ? "&"
+                    : "?";
+
+            const response = await fetch(
+                `${MESSAGES_URL}${separator}t=${Date.now()}`,
+                {
+                    cache: "no-store"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `Message request returned status ${response.status}.`
+                );
+            }
+
+            const configuration =
+                await response.json();
+
+            const messages =
+                Array.isArray(configuration.messages)
+                    ? configuration.messages.filter(
+                        (message) => {
+                            return (
+                                message &&
+                                typeof message.text ===
+                                    "string" &&
+                                message.text.trim()
+                            );
+                        }
+                    )
+                    : [];
+
+            if (messages.length === 0) {
+                throw new Error(
+                    "The message list is empty."
+                );
+            }
+
+            messageSettings = {
+                defaultDuration:
+                    Number.isFinite(
+                        configuration.defaultDuration
+                    )
+                        ? configuration.defaultDuration
+                        : fallbackMessageSettings.defaultDuration,
+
+                transitionDuration:
+                    Number.isFinite(
+                        configuration.transitionDuration
+                    )
+                        ? configuration.transitionDuration
+                        : fallbackMessageSettings.transitionDuration,
+
+                messages
+            };
+        } catch (error) {
+            console.error(
+                "Unable to load messages.json. Using fallback messages.",
+                error
+            );
+        }
     }
 
     /*
@@ -405,7 +509,7 @@
 
     /*
      * ------------------------------------------------------------
-     * HTML CREATION
+     * ELEMENT CREATION
      * ------------------------------------------------------------
      */
 
@@ -595,7 +699,7 @@
         while (
             fontSize >= minimumFontSize
         ) {
-            scheduleLine.style.fontSize =
+            track.style.fontSize =
                 `${fontSize}px`;
 
             void track.offsetWidth;
@@ -603,9 +707,6 @@
             children =
                 Array.from(track.children);
 
-            /*
-             * NOW | NEXT | AFTER
-             */
             initialGroupWidth =
                 sumChildWidths(
                     children,
@@ -613,9 +714,6 @@
                     4
                 );
 
-            /*
-             * NEXT | AFTER | LATER
-             */
             laterGroupWidth =
                 sumChildWidths(
                     children,
@@ -640,14 +738,6 @@
             fontSize -= 1;
         }
 
-        /*
-         * The width of:
-         *
-         * NOW entry + first separator
-         *
-         * Moving left by this exact amount makes
-         * NEXT land at the left edge of the bar.
-         */
         const nowAndSeparatorWidth =
             sumChildWidths(
                 children,
@@ -661,9 +751,35 @@
         };
     }
 
+    function fitMessageText(messageLayer) {
+        const maximumFontSize =
+            20;
+
+        const minimumFontSize =
+            12;
+
+        let fontSize =
+            maximumFontSize;
+
+        messageLayer.style.fontSize =
+            `${fontSize}px`;
+
+        while (
+            messageLayer.scrollWidth >
+                messageLayer.clientWidth &&
+            fontSize >
+                minimumFontSize
+        ) {
+            fontSize -= 1;
+
+            messageLayer.style.fontSize =
+                `${fontSize}px`;
+        }
+    }
+
     /*
      * ------------------------------------------------------------
-     * ANIMATION
+     * ANIMATION HELPERS
      * ------------------------------------------------------------
      */
 
@@ -679,10 +795,69 @@
         });
     }
 
-    async function runAnimationCycle(
+    async function showMessages(
+        messageLayer,
+        version
+    ) {
+        const messages =
+            messageSettings.messages;
+
+        const transitionDuration =
+            messageSettings.transitionDuration;
+
+        messageLayer.style.transitionDuration =
+            `${transitionDuration}ms`;
+
+        for (const message of messages) {
+            if (
+                version !== animationVersion ||
+                !messageLayer.isConnected
+            ) {
+                return false;
+            }
+
+            messageLayer.textContent =
+                message.text;
+
+            fitMessageText(
+                messageLayer
+            );
+
+            messageLayer.classList.add(
+                "is-visible"
+            );
+
+            const duration =
+                Number.isFinite(message.duration)
+                    ? message.duration
+                    : messageSettings.defaultDuration;
+
+            await wait(duration);
+
+            if (
+                version !== animationVersion ||
+                !messageLayer.isConnected
+            ) {
+                return false;
+            }
+
+            messageLayer.classList.remove(
+                "is-visible"
+            );
+
+            await wait(
+                transitionDuration
+            );
+        }
+
+        return true;
+    }
+
+    async function runPresentationCycle(
         track,
         offsets,
         laterPieces,
+        messageLayer,
         version
     ) {
         while (
@@ -690,7 +865,7 @@
             track.isConnected
         ) {
             /*
-             * Initial left-aligned view:
+             * Initial view:
              *
              * NOW | NEXT | AFTER
              */
@@ -706,10 +881,7 @@
             }
 
             /*
-             * Slide left by the entire width of
-             * NOW and its separator.
-             *
-             * The ending view begins with NEXT.
+             * Slide NOW away.
              */
             track.style.transform =
                 `translateX(${offsets.laterOffset}px)`;
@@ -726,8 +898,7 @@
             }
 
             /*
-             * Reveal the final separator and LATER entry
-             * as the track approaches its final position.
+             * Reveal LATER near the end of the slide.
              */
             setLaterVisibility(
                 laterPieces,
@@ -751,14 +922,14 @@
             }
 
             /*
-             * Fade the entire schedule out.
+             * Fade the schedule track out.
              */
-            scheduleLine.classList.add(
+            track.classList.add(
                 "is-hidden"
             );
 
             await wait(
-                FADE_DURATION
+                SCHEDULE_FADE_DURATION
             );
 
             if (
@@ -769,17 +940,13 @@
             }
 
             /*
-             * Hide LATER again while invisible.
+             * Reset the schedule while it is invisible.
              */
             setLaterVisibility(
                 laterPieces,
                 false
             );
 
-            /*
-             * Reset to the left-aligned NOW position
-             * without animating backward.
-             */
             track.classList.add(
                 "no-transition"
             );
@@ -794,14 +961,34 @@
             );
 
             /*
-             * Fade NOW / NEXT / AFTER back in.
+             * Display the message sequence.
              */
-            scheduleLine.classList.remove(
+            const completedMessages =
+                await showMessages(
+                    messageLayer,
+                    version
+                );
+
+            if (!completedMessages) {
+                return;
+            }
+
+            if (
+                version !== animationVersion ||
+                !track.isConnected
+            ) {
+                return;
+            }
+
+            /*
+             * Return to NOW / NEXT / AFTER.
+             */
+            track.classList.remove(
                 "is-hidden"
             );
 
             await wait(
-                FADE_DURATION
+                SCHEDULE_FADE_DURATION
             );
         }
     }
@@ -835,10 +1022,6 @@
 
         const currentVersion =
             animationVersion;
-
-        scheduleLine.classList.remove(
-            "is-hidden"
-        );
 
         const track =
             document.createElement("div");
@@ -906,8 +1089,15 @@
             laterItem
         );
 
+        const messageLayer =
+            document.createElement("div");
+
+        messageLayer.className =
+            "schedule-message-layer";
+
         scheduleLine.replaceChildren(
-            track
+            track,
+            messageLayer
         );
 
         hasLoadedSchedule = true;
@@ -927,11 +1117,9 @@
             fitAndMeasureTrack(track);
 
         track.style.transitionDuration =
-            `${SLIDE_DURATION}ms`;
+            `${SLIDE_DURATION}ms, ` +
+            `${SCHEDULE_FADE_DURATION}ms`;
 
-        /*
-         * Begin at the left edge of the schedule area.
-         */
         track.style.transform =
             `translateX(${offsets.initialOffset}px)`;
 
@@ -951,17 +1139,18 @@
                 )
             );
 
-        runAnimationCycle(
+        runPresentationCycle(
             track,
             offsets,
             laterPieces,
+            messageLayer,
             currentVersion
         );
     }
 
     /*
      * ------------------------------------------------------------
-     * FETCHING
+     * SCHEDULE FETCHING
      * ------------------------------------------------------------
      */
 
@@ -1022,10 +1211,24 @@
         }
     }
 
-    refreshSchedule();
+    /*
+     * Load the messages before beginning the first
+     * schedule and message presentation cycle.
+     */
+    async function initialize() {
+        await refreshMessages();
+        await refreshSchedule();
 
-    window.setInterval(
-        refreshSchedule,
-        REFRESH_INTERVAL
-    );
+        window.setInterval(
+            refreshSchedule,
+            SCHEDULE_REFRESH_INTERVAL
+        );
+
+        window.setInterval(
+            refreshMessages,
+            MESSAGES_REFRESH_INTERVAL
+        );
+    }
+
+    initialize();
 })();
