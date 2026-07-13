@@ -1,63 +1,398 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Live + Up Next + Following</title>
+  <style>
+    :root{
+      --live-bg:#f73435;
+      --next-bg:#fdd324;
+      --follow-bg:#ffffff;
+      --text:#ffffff;
+      --text-dark:#111111;
+      --pill:#11111133;
+      --shadow: 0 8px 24px rgba(0,0,0,.35);
+      --radius: 16px;
+      --pad: 14px;
+      --font: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+      /* transition tuning */
+      --slide-ms: 520ms;
+      --slide-dist: 26px;
+    }
 
-    <title>Mario Mania Marathon 2027 — 16:9 Overlay</title>
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background: transparent;
+      font-family: var(--font);
+    }
 
-    <link
-        rel="stylesheet"
-        href="../css/overlay.css?v=3"
-    >
+    .wrap{
+      width: 1220px; /* wider for 3 cards; adjust to your OBS source size */
+      padding: 12px;
+    }
 
-    <script
-        src="../js/overlay.js"
-        defer
-    ></script>
+    .row{
+      display:flex;
+      gap: 12px;
+    }
+
+    .card{
+      flex:1;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+      backdrop-filter: blur(2px);
+      overflow:hidden;
+    }
+
+    .card.live{ background: var(--live-bg); color: var(--text); }
+    .card.next{ background: var(--next-bg); color: var(--text-dark); }
+    .card.follow{ background: var(--follow-bg); color: var(--text-dark); }
+
+    .label{
+      font-weight: 900;
+      letter-spacing: .08em;
+      font-size: 12px;
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      margin-bottom: 8px;
+      opacity: .95;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: var(--pill);
+      font-weight: 800;
+      font-size: 11px;
+      letter-spacing: .06em;
+    }
+
+    .title{
+      font-weight: 900;
+      font-size: 22px;
+      line-height: 1.15;
+      margin: 0 0 6px 0;
+      word-break: break-word;
+    }
+
+    .sub{
+      font-weight: 700;
+      font-size: 14px;
+      opacity: .92;
+      margin: 0;
+      word-break: break-word;
+    }
+
+    .meta{
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      opacity: .9;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .meta span{
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.18);
+    }
+
+    .card.next .meta span,
+    .card.follow .meta span{
+      background: rgba(0,0,0,.10);
+    }
+
+    .error{
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      display:none;
+    }
+
+    @media (max-width: 900px){
+      .wrap{ width: 520px; }
+      .row{ flex-direction: column; }
+      .title{ font-size: 18px; }
+    }
+
+    /* Slide transition */
+    .card-content{
+      will-change: transform, opacity, filter;
+    }
+    .slide-out{
+      animation: slideOut var(--slide-ms) cubic-bezier(.22,.95,.36,1) forwards;
+    }
+    .slide-in{
+      animation: slideIn var(--slide-ms) cubic-bezier(.22,.95,.36,1) forwards;
+    }
+    @keyframes slideOut{
+      0%   { transform: translateX(0); opacity:1; filter: blur(0px); }
+      100% { transform: translateX(calc(var(--slide-dist) * -1)); opacity:0; filter: blur(2px); }
+    }
+    @keyframes slideIn{
+      0%   { transform: translateX(var(--slide-dist)); opacity:0; filter: blur(2px); }
+      100% { transform: translateX(0); opacity:1; filter: blur(0px); }
+    }
+  </style>
 </head>
-
 <body>
-    <main class="overlay">
+  <div class="wrap">
+    <div class="error" id="err"></div>
 
-        <img
-            class="overlay-frame"
-            src="../assets/frames/mmm27-16x9.png"
-            alt=""
-        >
-
-        <section
-            class="info-rotator"
-            aria-label="Mario Mania information"
-        >
-            <img
-                id="rotator-image"
-                class="rotator-image"
-                src="../assets/rotator/march-of-dimes.png"
-                alt="March of Dimes"
-            >
-        </section>
-
-        <div
-            id="event-clock"
-            class="event-clock"
-            aria-label="Current Eastern date and time"
-        >
-            LOADING...
+    <div class="row">
+      <div class="card live">
+        <div class="card-content" id="liveContent">
+          <div class="label"><span class="pill">LIVE</span><span id="liveTime"></span></div>
+          <div class="title" id="liveName">Loading…</div>
+          <p class="sub" id="liveGame"></p>
+          <div class="meta"><span id="liveChannel"></span></div>
         </div>
+      </div>
 
-        <div
-            id="donation-total"
-            class="donation-total"
-            aria-label="Current donation total"
-        >
-            $0
+      <div class="card next">
+        <div class="card-content" id="nextContent">
+          <div class="label"><span class="pill">UP NEXT</span><span id="nextTime"></span></div>
+          <div class="title" id="nextName">Loading…</div>
+          <p class="sub" id="nextGame"></p>
+          <div class="meta"><span id="nextChannel"></span></div>
         </div>
+      </div>
 
-    </main>
+      <div class="card follow">
+        <div class="card-content" id="followContent">
+          <div class="label"><span class="pill">AFTER THAT</span><span id="followTime"></span></div>
+          <div class="title" id="followName">Loading…</div>
+          <p class="sub" id="followGame"></p>
+          <div class="meta"><span id="followChannel"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCHEDULE_URL = "https://gist.githubusercontent.com/nerdxdtv/ee4d75e1de028f2d3ab5853a164ce935/raw/47381d77ff7b276442ffe8f7dce41ee843b8428a/schedule.json";
+    const EVENT_TZ = "America/New_York";
+    const SLOT_MINUTES = 120;
+    const REFRESH_MS = 15_000;
+
+    const $ = (id) => document.getElementById(id);
+
+    function showError(msg){
+      const el = $("err");
+      el.style.display = "block";
+      el.textContent = msg;
+    }
+    function clearError(){
+      const el = $("err");
+      el.style.display = "none";
+      el.textContent = "";
+    }
+
+    function parseStartFromId(id){
+      if(!id || typeof id !== "string") return null;
+      const m = id.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})$/);
+      if(!m) return null;
+      const [_, y, mo, d, hh, mm] = m;
+      return { y:+y, mo:+mo, d:+d, hh:+hh, mm:+mm };
+    }
+
+    function getNowInTZParts(tz){
+      const fmt = new Intl.DateTimeFormat("en-US", {
+        timeZone: tz,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+      const parts = fmt.formatToParts(new Date()).reduce((acc,p)=>{
+        acc[p.type] = p.value; return acc;
+      }, {});
+      return {
+        y:+parts.year, mo:+parts.month, d:+parts.day,
+        hh:+parts.hour, mm:+parts.minute, ss:+parts.second
+      };
+    }
+
+    function partsToSortableNumber(p){
+      const pad2 = (n)=>String(n).padStart(2,"0");
+      return Number(
+        String(p.y) + pad2(p.mo) + pad2(p.d) + pad2(p.hh) + pad2(p.mm) + pad2(p.ss ?? 0)
+      );
+    }
+
+    function addMinutesToParts(p, minutes){
+      const dt = new Date(Date.UTC(p.y, p.mo-1, p.d, p.hh, p.mm, 0));
+      dt.setUTCMinutes(dt.getUTCMinutes() + minutes);
+      return { y:dt.getUTCFullYear(), mo:dt.getUTCMonth()+1, d:dt.getUTCDate(), hh:dt.getUTCHours(), mm:dt.getUTCMinutes(), ss:0 };
+    }
+
+    // ✅ NEW: 12-hour formatter with AM/PM
+    function format12h(hh, mm){
+      const ampm = hh >= 12 ? "PM" : "AM";
+      let h = hh % 12;
+      if(h === 0) h = 12;
+      const m = String(mm).padStart(2,"0");
+      return `${h}:${m} ${ampm}`;
+    }
+
+    function formatTimeRange(startParts){
+      const endParts = addMinutesToParts(startParts, SLOT_MINUTES);
+      const s = format12h(startParts.hh, startParts.mm);
+      const e = format12h(endParts.hh, endParts.mm);
+      return `${s}–${e} ET`;
+    }
+
+    function pickLiveNextFollow(schedule){
+      const now = getNowInTZParts(EVENT_TZ);
+      const nowN = partsToSortableNumber(now);
+
+      const items = (Array.isArray(schedule) ? schedule : [])
+        .map(x => {
+          const sp = parseStartFromId(x.id);
+          if(!sp) return null;
+          const startN = partsToSortableNumber({...sp, ss:0});
+          const endN = partsToSortableNumber(addMinutesToParts({...sp, ss:0}, SLOT_MINUTES));
+          return { raw:x, sp, startN, endN };
+        })
+        .filter(Boolean)
+        .sort((a,b)=>a.startN - b.startN);
+
+      const live = items.find(it => nowN >= it.startN && nowN < it.endN) || null;
+
+      let next = null, follow = null;
+      if(live){
+        const idx = items.indexOf(live);
+        next = items[idx+1] || null;
+        follow = items[idx+2] || null;
+      }else{
+        next = items.find(it => it.startN > nowN) || null;
+        if(next){
+          const idx = items.indexOf(next);
+          follow = items[idx+1] || null;
+        }
+      }
+
+      return { live, next, follow };
+    }
+
+    function runSlide(contentEl, updateFn){
+      contentEl.classList.remove("slide-in","slide-out");
+      contentEl.classList.add("slide-out");
+
+      const onOut = () => {
+        contentEl.removeEventListener("animationend", onOut);
+        updateFn();
+        contentEl.classList.remove("slide-out");
+        contentEl.classList.add("slide-in");
+        contentEl.addEventListener("animationend", () => contentEl.classList.remove("slide-in"), { once:true });
+      };
+
+      contentEl.addEventListener("animationend", onOut, { once:true });
+    }
+
+    function setCard(prefix, entry, fallbackLabel){
+      const nameEl = $(prefix + "Name");
+      const gameEl = $(prefix + "Game");
+      const timeEl = $(prefix + "Time");
+      const chanEl = $(prefix + "Channel");
+
+      if(!entry){
+        nameEl.textContent = fallbackLabel;
+        gameEl.textContent = "";
+        timeEl.textContent = "";
+        chanEl.textContent = "";
+        return;
+      }
+
+      const s = entry.raw.streamerName || "TBA";
+      const g = entry.raw.gameTitle || "";
+      const u = entry.raw.twitchURL || "";
+
+      nameEl.textContent = s;
+      gameEl.textContent = g ? `Game: ${g}` : "";
+      timeEl.textContent = formatTimeRange(entry.sp);
+      chanEl.textContent = u ? u.replace(/^https?:\/\//,"") : "";
+    }
+
+    let lastLiveId = null, lastNextId = null, lastFollowId = null;
+    let firstPaint = true;
+
+    async function refresh(){
+      try{
+        clearError();
+        const url = SCHEDULE_URL + (SCHEDULE_URL.includes("?") ? "&" : "?") + "t=" + Date.now();
+        const res = await fetch(url, { cache: "no-store" });
+        if(!res.ok) throw new Error(`Schedule fetch failed (${res.status})`);
+
+        const schedule = await res.json();
+        const { live, next, follow } = pickLiveNextFollow(schedule);
+
+        const liveId = live?.raw?.id || "";
+        const nextId = next?.raw?.id || "";
+        const followId = follow?.raw?.id || "";
+
+        if(firstPaint){
+          setCard("live", live, "No slot right now");
+          setCard("next", next, "No upcoming slot");
+          setCard("follow", follow, "No following slot");
+          lastLiveId = liveId; lastNextId = nextId; lastFollowId = followId;
+          firstPaint = false;
+          return;
+        }
+
+        if(liveId !== lastLiveId){
+          runSlide($("liveContent"), () => setCard("live", live, "No slot right now"));
+          lastLiveId = liveId;
+        } else {
+          setCard("live", live, "No slot right now");
+        }
+
+        if(nextId !== lastNextId){
+          runSlide($("nextContent"), () => setCard("next", next, "No upcoming slot"));
+          lastNextId = nextId;
+        } else {
+          setCard("next", next, "No upcoming slot");
+        }
+
+        if(followId !== lastFollowId){
+          runSlide($("followContent"), () => setCard("follow", follow, "No following slot"));
+          lastFollowId = followId;
+        } else {
+          setCard("follow", follow, "No following slot");
+        }
+
+      } catch(e){
+        showError(String(e.message || e));
+        if(!firstPaint){
+          runSlide($("liveContent"), () => setCard("live", null, "Schedule error"));
+          runSlide($("nextContent"), () => setCard("next", null, "Schedule error"));
+          runSlide($("followContent"), () => setCard("follow", null, "Schedule error"));
+        } else {
+          setCard("live", null, "Schedule error");
+          setCard("next", null, "Schedule error");
+          setCard("follow", null, "Schedule error");
+          firstPaint = false;
+        }
+      }
+    }
+
+    refresh();
+    setInterval(refresh, REFRESH_MS);
+  </script>
 </body>
 </html>
