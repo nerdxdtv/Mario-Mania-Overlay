@@ -15,8 +15,15 @@
         href="../css/overlay.css?v=8"
     >
 
+    <!-- Existing clock, rotator, and donation functionality -->
     <script
         src="../js/overlay.js?v=8"
+        defer
+    ></script>
+
+    <!-- Separate schedule functionality -->
+    <script
+        src="../js/schedule.js?v=1"
         defer
     ></script>
 </head>
@@ -44,38 +51,17 @@
             alt=""
         >
 
-        <!-- Static schedule placement test -->
+        <!-- Dynamic schedule -->
         <section
             class="schedule-bar"
             aria-label="Mario Mania schedule"
         >
-            <div class="schedule-line">
-
-                <span class="schedule-item">
-                    <span class="schedule-label">NOW:</span>
-                    <span class="schedule-game">SUPER MARIO ODYSSEY</span>
-                    <span class="schedule-with">w/</span>
-                    <span class="schedule-streamer">SuperNintendad</span>
-                </span>
-
-                <span class="schedule-separator">|</span>
-
-                <span class="schedule-item">
-                    <span class="schedule-label">NEXT:</span>
-                    <span class="schedule-game">SUPER MARIO BROS.</span>
-                    <span class="schedule-with">w/</span>
-                    <span class="schedule-streamer">NerdXD</span>
-                </span>
-
-                <span class="schedule-separator">|</span>
-
-                <span class="schedule-item">
-                    <span class="schedule-label">AFTER:</span>
-                    <span class="schedule-game">SUPER MARIO SUNSHINE</span>
-                    <span class="schedule-with">w/</span>
-                    <span class="schedule-streamer">FoxxyTV</span>
-                </span>
-
+            <div
+                id="schedule-line"
+                class="schedule-line"
+                aria-live="polite"
+            >
+                LOADING SCHEDULE...
             </div>
         </section>
 
