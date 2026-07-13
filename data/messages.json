@@ -1,0 +1,19 @@
+{
+    "defaultDuration": 5000,
+    "transitionDuration": 500,
+    "messages": [
+        {
+            "text": "Mario Mania benefits March of Dimes!"
+        },
+        {
+            "text": "...but only because of YOU!"
+        },
+        {
+            "text": "$5 can support newborn screenings through March of Dimes Advocacy.",
+            "duration": 6500
+        },
+        {
+            "text": "Donate at MarioManiaMarathon.com"
+        }
+    ]
+}
