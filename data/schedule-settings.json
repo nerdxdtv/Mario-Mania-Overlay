@@ -4,7 +4,7 @@
   "messagesRefreshInterval": 60000,
   "testMode": {
     "enabled": true,
-    "state": "after",
+    "state": "live",
     "startIndex": 0
   },
   "timing": {
