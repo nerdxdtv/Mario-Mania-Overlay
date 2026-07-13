@@ -37,8 +37,6 @@ body {
 
 /*
  * Informational image rotator.
- *
- * This sits underneath the static overlay artwork.
  */
 .info-rotator {
     position: absolute;
@@ -115,7 +113,7 @@ body {
 }
 
 /*
- * The visible schedule viewport.
+ * Visible schedule viewport.
  */
 .schedule-line {
     position: relative;
@@ -139,7 +137,6 @@ body {
     line-height: 1;
 
     white-space: nowrap;
-
     opacity: 1;
 
     transition:
@@ -149,11 +146,7 @@ body {
 }
 
 /*
- * The track contains four entries:
- *
- * NOW | NEXT | AFTER | LATER
- *
- * JavaScript moves this track horizontally.
+ * Horizontally moving schedule track.
  */
 .schedule-track {
     position: absolute;
@@ -217,6 +210,39 @@ body {
     margin: 0 18px;
 
     font-weight: 900;
+    opacity: 0.5;
+}
+
+/*
+ * The final separator and LATER entry remain invisible
+ * until JavaScript reveals them near the end of the slide.
+ *
+ * They still occupy space, allowing the track to be
+ * measured and centered correctly.
+ */
+.schedule-later-piece {
+    opacity: 0;
+    transform: translateX(8px);
+
+    transition:
+        opacity 450ms ease-in-out,
+        transform 450ms ease-in-out;
+
+    will-change:
+        opacity,
+        transform;
+}
+
+.schedule-later-piece.schedule-separator {
+    opacity: 0;
+}
+
+.schedule-later-piece.is-visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.schedule-later-piece.schedule-separator.is-visible {
     opacity: 0.5;
 }
 
