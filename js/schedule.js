@@ -31,16 +31,30 @@
         120;
 
     /*
-     * Schedule animation timing.
+     * Schedule presentation timing.
      */
     const INITIAL_VIEW_DURATION =
         5000;
 
+    const NOW_FADE_DURATION =
+        450;
+
+    /*
+     * Small pause after NOW disappears,
+     * before the horizontal slide begins.
+     */
+    const SLIDE_DELAY_AFTER_NOW_FADE =
+        250;
+
     const SLIDE_DURATION =
         900;
 
+    /*
+     * LATER begins appearing while the
+     * horizontal movement is finishing.
+     */
     const LATER_REVEAL_DELAY =
-        600;
+        550;
 
     const LATER_VIEW_DURATION =
         5000;
@@ -68,6 +82,7 @@
     const fallbackMessageSettings = {
         defaultDuration: 5000,
         transitionDuration: 500,
+
         messages: [
             {
                 text:
@@ -80,6 +95,7 @@
             {
                 text:
                     "$5 can support newborn screenings through March of Dimes Advocacy.",
+
                 duration:
                     6500
             },
@@ -92,6 +108,7 @@
 
     let messageSettings = {
         ...fallbackMessageSettings,
+
         messages: [
             ...fallbackMessageSettings.messages
         ]
@@ -707,6 +724,9 @@
             children =
                 Array.from(track.children);
 
+            /*
+             * NOW | NEXT | AFTER
+             */
             initialGroupWidth =
                 sumChildWidths(
                     children,
@@ -714,6 +734,9 @@
                     4
                 );
 
+            /*
+             * NEXT | AFTER | LATER
+             */
             laterGroupWidth =
                 sumChildWidths(
                     children,
@@ -745,9 +768,32 @@
                 1
             );
 
+        /*
+         * Center NOW / NEXT / AFTER.
+         */
+        const initialOffset =
+            (
+                scheduleLine.clientWidth -
+                initialGroupWidth
+            ) / 2;
+
+        /*
+         * Center NEXT / AFTER / LATER.
+         *
+         * Subtracting the width of NOW and its
+         * separator accounts for their position
+         * at the beginning of the full track.
+         */
+        const laterOffset =
+            (
+                scheduleLine.clientWidth -
+                laterGroupWidth
+            ) / 2 -
+            nowAndSeparatorWidth;
+
         return {
-            initialOffset: 0,
-            laterOffset: -nowAndSeparatorWidth
+            initialOffset,
+            laterOffset
         };
     }
 
@@ -782,6 +828,18 @@
      * ANIMATION HELPERS
      * ------------------------------------------------------------
      */
+
+    function setNowVisibility(
+        nowPieces,
+        isVisible
+    ) {
+        nowPieces.forEach((piece) => {
+            piece.classList.toggle(
+                "is-hidden",
+                !isVisible
+            );
+        });
+    }
 
     function setLaterVisibility(
         laterPieces,
@@ -856,6 +914,7 @@
     async function runPresentationCycle(
         track,
         offsets,
+        nowPieces,
         laterPieces,
         messageLayer,
         version
@@ -865,7 +924,7 @@
             track.isConnected
         ) {
             /*
-             * Initial view:
+             * Opening centered view:
              *
              * NOW | NEXT | AFTER
              */
@@ -881,7 +940,28 @@
             }
 
             /*
-             * Slide NOW away.
+             * Fade NOW and its separator away first.
+             */
+            setNowVisibility(
+                nowPieces,
+                false
+            );
+
+            await wait(
+                NOW_FADE_DURATION +
+                SLIDE_DELAY_AFTER_NOW_FADE
+            );
+
+            if (
+                version !== animationVersion ||
+                !track.isConnected
+            ) {
+                return;
+            }
+
+            /*
+             * Slide the remaining schedule into its
+             * new centered position.
              */
             track.style.transform =
                 `translateX(${offsets.laterOffset}px)`;
@@ -898,7 +978,7 @@
             }
 
             /*
-             * Reveal LATER near the end of the slide.
+             * Reveal LATER as the slide finishes.
              */
             setLaterVisibility(
                 laterPieces,
@@ -940,8 +1020,13 @@
             }
 
             /*
-             * Reset the schedule while it is invisible.
+             * Restore the opening schedule while hidden.
              */
+            setNowVisibility(
+                nowPieces,
+                true
+            );
+
             setLaterVisibility(
                 laterPieces,
                 false
@@ -961,7 +1046,7 @@
             );
 
             /*
-             * Display the message sequence.
+             * Display the informational messages.
              */
             const completedMessages =
                 await showMessages(
@@ -981,7 +1066,7 @@
             }
 
             /*
-             * Return to NOW / NEXT / AFTER.
+             * Return to centered NOW / NEXT / AFTER.
              */
             track.classList.remove(
                 "is-hidden"
@@ -1029,18 +1114,32 @@
         track.className =
             "schedule-track no-transition";
 
-        track.appendChild(
+        const nowItem =
             createScheduleItem(
                 "NOW",
                 selectedEntries.now,
                 TEST_MODE
                     ? "TEST SLOT"
                     : "NOT LIVE"
-            )
+            );
+
+        nowItem.classList.add(
+            "schedule-now-piece"
         );
 
         track.appendChild(
-            createSeparator()
+            nowItem
+        );
+
+        const nowSeparator =
+            createSeparator();
+
+        nowSeparator.classList.add(
+            "schedule-now-piece"
+        );
+
+        track.appendChild(
+            nowSeparator
         );
 
         track.appendChild(
@@ -1120,6 +1219,9 @@
             `${SLIDE_DURATION}ms, ` +
             `${SCHEDULE_FADE_DURATION}ms`;
 
+        /*
+         * Begin centered on NOW / NEXT / AFTER.
+         */
         track.style.transform =
             `translateX(${offsets.initialOffset}px)`;
 
@@ -1132,6 +1234,13 @@
             "no-transition"
         );
 
+        const nowPieces =
+            Array.from(
+                track.querySelectorAll(
+                    ".schedule-now-piece"
+                )
+            );
+
         const laterPieces =
             Array.from(
                 track.querySelectorAll(
@@ -1142,6 +1251,7 @@
         runPresentationCycle(
             track,
             offsets,
+            nowPieces,
             laterPieces,
             messageLayer,
             currentVersion
@@ -1211,10 +1321,6 @@
         }
     }
 
-    /*
-     * Load the messages before beginning the first
-     * schedule and message presentation cycle.
-     */
     async function initialize() {
         await refreshMessages();
         await refreshSchedule();
