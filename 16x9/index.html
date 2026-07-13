@@ -12,11 +12,11 @@
 
     <link
         rel="stylesheet"
-        href="../css/overlay.css?v=7"
+        href="../css/overlay.css?v=8"
     >
 
     <script
-        src="../js/overlay.js?v=7"
+        src="../js/overlay.js?v=8"
         defer
     ></script>
 </head>
@@ -24,10 +24,7 @@
 <body>
     <main class="overlay">
 
-        <!--
-            Informational image rotator.
-            CSS places this beneath the static overlay artwork.
-        -->
+        <!-- Informational image rotator -->
         <section
             class="info-rotator"
             aria-label="Mario Mania information"
@@ -46,6 +43,41 @@
             src="../assets/frames/mmm27-16x9.png"
             alt=""
         >
+
+        <!-- Static schedule placement test -->
+        <section
+            class="schedule-bar"
+            aria-label="Mario Mania schedule"
+        >
+            <div class="schedule-line">
+
+                <span class="schedule-item">
+                    <span class="schedule-label">NOW:</span>
+                    <span class="schedule-game">SUPER MARIO ODYSSEY</span>
+                    <span class="schedule-with">w/</span>
+                    <span class="schedule-streamer">SuperNintendad</span>
+                </span>
+
+                <span class="schedule-separator">|</span>
+
+                <span class="schedule-item">
+                    <span class="schedule-label">NEXT:</span>
+                    <span class="schedule-game">SUPER MARIO BROS.</span>
+                    <span class="schedule-with">w/</span>
+                    <span class="schedule-streamer">NerdXD</span>
+                </span>
+
+                <span class="schedule-separator">|</span>
+
+                <span class="schedule-item">
+                    <span class="schedule-label">AFTER:</span>
+                    <span class="schedule-game">SUPER MARIO SUNSHINE</span>
+                    <span class="schedule-with">w/</span>
+                    <span class="schedule-streamer">FoxxyTV</span>
+                </span>
+
+            </div>
+        </section>
 
         <!-- Current Eastern date and time -->
         <div
@@ -66,7 +98,5 @@
         </div>
 
     </main>
-
-    <!-- Force GitHub Pages redeployment -->
 </body>
 </html>
