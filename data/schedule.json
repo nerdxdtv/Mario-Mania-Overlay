@@ -6,9 +6,16 @@
     {
       "id": "mmm27-test-001",
       "startUtc": "2027-03-26T16:00:00Z",
-      "durationMinutes": 120,
+      "durationMinutes": 15,
+      "gameTitle": "Kickoff with Mario Mania",
+      "streamerName": "NerdXD"
+    },
+    {
+      "id": "mmm27-test-001",
+      "startUtc": "2027-03-26T16:15:00Z",
+      "durationMinutes": 105,
       "gameTitle": "Super Mario Bros.",
-      "streamerName": "Test Runner 1"
+      "streamerName": "BabylonZool"
     },
     {
       "id": "mmm27-test-002",
@@ -23,6 +30,13 @@
       "durationMinutes": 150,
       "gameTitle": "Super Mario Sunshine",
       "streamerName": "Test Runner 3"
+    },
+    {
+      "id": "mmm27-test-002",
+      "startUtc": "2027-03-26T18:00:00Z",
+      "durationMinutes": 90,
+      "gameTitle": "Super Mario World",
+      "streamerName": "Test Runner 2"
     },
     {
       "id": "mmm27-test-004",
