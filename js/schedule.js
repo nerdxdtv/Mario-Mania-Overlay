@@ -25,8 +25,7 @@
         120;
 
     /*
-     * Shortened temporarily so the animation
-     * is easy to verify in OBS.
+     * Temporary short timing for animation testing.
      */
     const INITIAL_VIEW_DURATION =
         5000;
@@ -34,16 +33,19 @@
     const SLIDE_DURATION =
         900;
 
+    /*
+     * LATER begins fading in this many milliseconds
+     * after the horizontal slide starts.
+     */
+    const LATER_REVEAL_DELAY =
+        600;
+
     const LATER_VIEW_DURATION =
         5000;
 
     const FADE_DURATION =
         500;
 
-    /*
-     * Last year's event has ended, so test mode
-     * selects historical entries directly.
-     */
     const TEST_MODE =
         true;
 
@@ -100,11 +102,6 @@
             return;
         }
 
-        /*
-         * OBS can occasionally leave document.fonts.ready
-         * pending for a long time. Continue after 1.2 seconds
-         * even if a webfont request is still unresolved.
-         */
         await Promise.race([
             document.fonts.ready.catch(() => {}),
             wait(1200)
@@ -649,9 +646,6 @@
             ) / 2 -
             firstItemAndSeparatorWidth;
 
-        /*
-         * Guarantee that the motion is visibly noticeable.
-         */
         if (
             Math.abs(
                 laterOffset - initialOffset
@@ -677,15 +671,33 @@
      * ------------------------------------------------------------
      */
 
+    function setLaterVisibility(
+        laterPieces,
+        isVisible
+    ) {
+        laterPieces.forEach((piece) => {
+            piece.classList.toggle(
+                "is-visible",
+                isVisible
+            );
+        });
+    }
+
     async function runAnimationCycle(
         track,
         offsets,
+        laterPieces,
         version
     ) {
         while (
             version === animationVersion &&
             track.isConnected
         ) {
+            /*
+             * Initial view:
+             *
+             * NOW | NEXT | AFTER
+             */
             await wait(
                 INITIAL_VIEW_DURATION
             );
@@ -698,19 +710,41 @@
             }
 
             /*
-             * Slide from:
-             *
-             * NOW | NEXT | AFTER
-             *
-             * to:
-             *
-             * NEXT | AFTER | LATER
+             * Begin horizontal movement.
              */
             track.style.transform =
                 `translateX(${offsets.laterOffset}px)`;
 
+            /*
+             * Wait until the slide is nearly finished,
+             * then reveal the final separator and entry.
+             */
             await wait(
-                SLIDE_DURATION +
+                LATER_REVEAL_DELAY
+            );
+
+            if (
+                version !== animationVersion ||
+                !track.isConnected
+            ) {
+                return;
+            }
+
+            setLaterVisibility(
+                laterPieces,
+                true
+            );
+
+            /*
+             * Finish the remaining portion of the slide,
+             * then keep the later view on screen.
+             */
+            await wait(
+                Math.max(
+                    SLIDE_DURATION -
+                        LATER_REVEAL_DELAY,
+                    0
+                ) +
                 LATER_VIEW_DURATION
             );
 
@@ -721,6 +755,9 @@
                 return;
             }
 
+            /*
+             * Fade the entire schedule away.
+             */
             scheduleLine.classList.add(
                 "is-hidden"
             );
@@ -736,6 +773,17 @@
                 return;
             }
 
+            /*
+             * Hide LATER again while the line is invisible.
+             */
+            setLaterVisibility(
+                laterPieces,
+                false
+            );
+
+            /*
+             * Reset the horizontal track without animation.
+             */
             track.classList.add(
                 "no-transition"
             );
@@ -749,6 +797,9 @@
                 "no-transition"
             );
 
+            /*
+             * Fade NOW / NEXT / AFTER back in.
+             */
             scheduleLine.classList.remove(
                 "is-hidden"
             );
@@ -833,16 +884,30 @@
             )
         );
 
-        track.appendChild(
-            createSeparator()
+        const laterSeparator =
+            createSeparator();
+
+        laterSeparator.classList.add(
+            "schedule-later-piece"
         );
 
         track.appendChild(
+            laterSeparator
+        );
+
+        const laterItem =
             createScheduleItem(
                 "LATER",
                 selectedEntries.later,
                 "NO LATER SLOT"
-            )
+            );
+
+        laterItem.classList.add(
+            "schedule-later-piece"
+        );
+
+        track.appendChild(
+            laterItem
         );
 
         scheduleLine.replaceChildren(
@@ -880,9 +945,17 @@
             "no-transition"
         );
 
+        const laterPieces =
+            Array.from(
+                track.querySelectorAll(
+                    ".schedule-later-piece"
+                )
+            );
+
         runAnimationCycle(
             track,
             offsets,
+            laterPieces,
             currentVersion
         );
     }
