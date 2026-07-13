@@ -31,19 +31,5 @@
       "gameTitle": "Super Mario World",
       "streamerName": "Cursev_Puns"
     },
-    {
-      "id": "mmm27-test-002",
-      "startUtc": "2027-03-26T22:00:00Z",
-      "durationMinutes": 120,
-      "gameTitle": "Super Mario Galaxy",
-      "streamerName": "Kalieta"
-    },
-    {
-      "id": "mmm27-test-004",
-      "startUtc": "2027-03-27T00:00:00Z",
-      "durationMinutes": 120,
-      "gameTitle": "Mario Party Superstars",
-      "streamerName": "KeyworkSavior"
-    }
   ]
 }
