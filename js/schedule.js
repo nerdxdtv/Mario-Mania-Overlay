@@ -1,6 +1,6 @@
 /*
  * Mario Mania Marathon 2027
- * Bottom schedule-bar functionality
+ * Animated bottom schedule bar
  */
 
 (function () {
@@ -25,23 +25,26 @@
         120;
 
     /*
-     * Last year's event has already ended.
-     *
-     * Test mode displays three consecutive entries
-     * from the old schedule instead of looking for
-     * a currently live 2026 slot.
-     *
-     * Change this to false when the 2027 schedule
-     * is ready and contains the real event dates.
+     * Animation timing.
+     */
+    const INITIAL_VIEW_DURATION =
+        10000;
+
+    const SLIDE_DURATION =
+        900;
+
+    const LATER_VIEW_DURATION =
+        8000;
+
+    const FADE_DURATION =
+        500;
+
+    /*
+     * Last year's schedule has ended, so test mode
+     * displays four consecutive historical entries.
      */
     const TEST_MODE = true;
 
-    /*
-     * 0 means the first three schedule entries.
-     *
-     * Change this to 1, 2, 3, and so forth to
-     * preview different groups from the schedule.
-     */
     const TEST_START_INDEX = 0;
 
     const scheduleLine =
@@ -53,6 +56,43 @@
 
     let lastScheduleSignature = "";
     let hasLoadedSchedule = false;
+
+    /*
+     * Every new schedule render increments this value.
+     * Older animation loops stop when their version
+     * no longer matches.
+     */
+    let animationVersion = 0;
+
+    /*
+     * ------------------------------------------------------------
+     * GENERAL HELPERS
+     * ------------------------------------------------------------
+     */
+
+    function wait(milliseconds) {
+        return new Promise((resolve) => {
+            window.setTimeout(
+                resolve,
+                milliseconds
+            );
+        });
+    }
+
+    function nextFrame() {
+        return new Promise((resolve) => {
+            window.requestAnimationFrame(
+                resolve
+            );
+        });
+    }
+
+    function padTwo(value) {
+        return String(value).padStart(
+            2,
+            "0"
+        );
+    }
 
     /*
      * ------------------------------------------------------------
@@ -69,7 +109,7 @@
         }
 
         /*
-         * Expected ID format:
+         * Expected format:
          *
          * 2026-03-27-0800
          */
@@ -89,10 +129,6 @@
             minute: Number(match[5]),
             second: 0
         };
-    }
-
-    function padTwo(value) {
-        return String(value).padStart(2, "0");
     }
 
     function partsToSortableNumber(parts) {
@@ -166,7 +202,7 @@
                 }
             );
 
-        const formattedParts =
+        const parts =
             formatter
                 .formatToParts(new Date())
                 .reduce(
@@ -180,23 +216,12 @@
                 );
 
         return {
-            year:
-                Number(formattedParts.year),
-
-            month:
-                Number(formattedParts.month),
-
-            day:
-                Number(formattedParts.day),
-
-            hour:
-                Number(formattedParts.hour),
-
-            minute:
-                Number(formattedParts.minute),
-
-            second:
-                Number(formattedParts.second)
+            year: Number(parts.year),
+            month: Number(parts.month),
+            day: Number(parts.day),
+            hour: Number(parts.hour),
+            minute: Number(parts.minute),
+            second: Number(parts.second)
         };
     }
 
@@ -258,10 +283,6 @@
     }
 
     function selectScheduleEntries(entries) {
-        /*
-         * For testing, simply display three entries
-         * from the old schedule.
-         */
         if (TEST_MODE) {
             return {
                 now:
@@ -277,11 +298,16 @@
                 after:
                     entries[
                         TEST_START_INDEX + 2
+                    ] || null,
+
+                later:
+                    entries[
+                        TEST_START_INDEX + 3
                     ] || null
             };
         }
 
-        const currentEasternTime =
+        const currentTime =
             partsToSortableNumber(
                 getCurrentEasternParts()
             );
@@ -289,20 +315,13 @@
         const currentEntry =
             entries.find((entry) => {
                 return (
-                    currentEasternTime >=
+                    currentTime >=
                         entry.startNumber &&
-                    currentEasternTime <
+                    currentTime <
                         entry.endNumber
                 );
             }) || null;
 
-        /*
-         * During the event:
-         *
-         * NOW   = current block
-         * NEXT  = following block
-         * AFTER = block after that
-         */
         if (currentEntry) {
             const currentIndex =
                 entries.indexOf(currentEntry);
@@ -319,20 +338,20 @@
                 after:
                     entries[
                         currentIndex + 2
+                    ] || null,
+
+                later:
+                    entries[
+                        currentIndex + 3
                     ] || null
             };
         }
 
-        /*
-         * Before the event begins, NOW will say
-         * NOT LIVE while NEXT and AFTER show the
-         * first two upcoming blocks.
-         */
         const firstUpcomingEntry =
             entries.find((entry) => {
                 return (
                     entry.startNumber >
-                    currentEasternTime
+                    currentTime
                 );
             }) || null;
 
@@ -352,23 +371,26 @@
                 after:
                     entries[
                         upcomingIndex + 1
+                    ] || null,
+
+                later:
+                    entries[
+                        upcomingIndex + 2
                     ] || null
             };
         }
 
-        /*
-         * The entire event has ended.
-         */
         return {
             now: null,
             next: null,
-            after: null
+            after: null,
+            later: null
         };
     }
 
     /*
      * ------------------------------------------------------------
-     * SCHEDULE HTML
+     * ELEMENT CREATION
      * ------------------------------------------------------------
      */
 
@@ -476,52 +498,280 @@
         return separator;
     }
 
-    function buildSignature(selectedEntries) {
+    function buildSignature(entries) {
         return [
-            selectedEntries.now?.raw?.id || "",
-            selectedEntries.next?.raw?.id || "",
-            selectedEntries.after?.raw?.id || ""
+            entries.now?.raw?.id || "",
+            entries.next?.raw?.id || "",
+            entries.after?.raw?.id || "",
+            entries.later?.raw?.id || ""
         ].join("|");
     }
 
-    function fitScheduleText() {
-        /*
-         * Start at the existing 20-pixel size.
-         * Reduce it only when the selected games
-         * and streamer names do not fit.
-         */
+    /*
+     * Returns the rendered width including margins.
+     */
+    function getOuterWidth(element) {
+        const styles =
+            window.getComputedStyle(element);
+
+        const marginLeft =
+            Number.parseFloat(
+                styles.marginLeft
+            ) || 0;
+
+        const marginRight =
+            Number.parseFloat(
+                styles.marginRight
+            ) || 0;
+
+        return (
+            element.getBoundingClientRect().width +
+            marginLeft +
+            marginRight
+        );
+    }
+
+    function sumChildWidths(
+        children,
+        startIndex,
+        endIndex
+    ) {
+        let total = 0;
+
+        for (
+            let index = startIndex;
+            index <= endIndex;
+            index += 1
+        ) {
+            total +=
+                getOuterWidth(
+                    children[index]
+                );
+        }
+
+        return total;
+    }
+
+    /*
+     * ------------------------------------------------------------
+     * FITTING AND POSITIONING
+     * ------------------------------------------------------------
+     */
+
+    function fitAndMeasureTrack(track) {
         const maximumFontSize = 20;
         const minimumFontSize = 12;
+        const safetyPadding = 12;
 
         let fontSize =
             maximumFontSize;
 
-        scheduleLine.style.fontSize =
-            `${fontSize}px`;
+        let children =
+            Array.from(track.children);
+
+        let initialGroupWidth = 0;
+        let laterGroupWidth = 0;
 
         while (
-            scheduleLine.scrollWidth >
-                scheduleLine.clientWidth &&
-            fontSize >
-                minimumFontSize
+            fontSize >= minimumFontSize
         ) {
-            fontSize -= 1;
-
             scheduleLine.style.fontSize =
                 `${fontSize}px`;
+
+            /*
+             * Force the browser to recalculate widths.
+             */
+            void track.offsetWidth;
+
+            children =
+                Array.from(track.children);
+
+            /*
+             * Children:
+             *
+             * 0 NOW
+             * 1 separator
+             * 2 NEXT
+             * 3 separator
+             * 4 AFTER
+             * 5 separator
+             * 6 LATER
+             */
+            initialGroupWidth =
+                sumChildWidths(
+                    children,
+                    0,
+                    4
+                );
+
+            laterGroupWidth =
+                sumChildWidths(
+                    children,
+                    2,
+                    6
+                );
+
+            const widestView =
+                Math.max(
+                    initialGroupWidth,
+                    laterGroupWidth
+                );
+
+            if (
+                widestView <=
+                scheduleLine.clientWidth -
+                    safetyPadding
+            ) {
+                break;
+            }
+
+            fontSize -= 1;
+        }
+
+        const firstEntryAndSeparatorWidth =
+            sumChildWidths(
+                children,
+                0,
+                1
+            );
+
+        /*
+         * Center NOW / NEXT / AFTER.
+         */
+        const initialOffset =
+            (
+                scheduleLine.clientWidth -
+                initialGroupWidth
+            ) / 2;
+
+        /*
+         * Center NEXT / AFTER / LATER.
+         */
+        const laterOffset =
+            (
+                scheduleLine.clientWidth -
+                laterGroupWidth
+            ) / 2 -
+            firstEntryAndSeparatorWidth;
+
+        return {
+            initialOffset,
+            laterOffset
+        };
+    }
+
+    /*
+     * ------------------------------------------------------------
+     * ANIMATION
+     * ------------------------------------------------------------
+     */
+
+    async function runAnimationCycle(
+        track,
+        offsets,
+        version
+    ) {
+        while (
+            version === animationVersion &&
+            track.isConnected
+        ) {
+            /*
+             * First view:
+             *
+             * NOW | NEXT | AFTER
+             */
+            await wait(
+                INITIAL_VIEW_DURATION
+            );
+
+            if (
+                version !== animationVersion ||
+                !track.isConnected
+            ) {
+                return;
+            }
+
+            /*
+             * Slide left:
+             *
+             * NEXT | AFTER | LATER
+             */
+            track.style.transform =
+                `translateX(${offsets.laterOffset}px)`;
+
+            await wait(
+                SLIDE_DURATION +
+                LATER_VIEW_DURATION
+            );
+
+            if (
+                version !== animationVersion ||
+                !track.isConnected
+            ) {
+                return;
+            }
+
+            /*
+             * Fade the whole line out.
+             */
+            scheduleLine.classList.add(
+                "is-hidden"
+            );
+
+            await wait(
+                FADE_DURATION
+            );
+
+            if (
+                version !== animationVersion ||
+                !track.isConnected
+            ) {
+                return;
+            }
+
+            /*
+             * Reset the track while invisible.
+             */
+            track.classList.add(
+                "no-transition"
+            );
+
+            track.style.transform =
+                `translateX(${offsets.initialOffset}px)`;
+
+            void track.offsetWidth;
+
+            track.classList.remove(
+                "no-transition"
+            );
+
+            /*
+             * Fade the original view back in.
+             */
+            scheduleLine.classList.remove(
+                "is-hidden"
+            );
+
+            await wait(
+                FADE_DURATION
+            );
         }
     }
 
-    function displaySchedule(
+    /*
+     * ------------------------------------------------------------
+     * RENDERING
+     * ------------------------------------------------------------
+     */
+
+    async function displaySchedule(
         selectedEntries
     ) {
         const signature =
-            buildSignature(selectedEntries);
+            buildSignature(
+                selectedEntries
+            );
 
-        /*
-         * Avoid rebuilding the line every fifteen
-         * seconds when nothing has changed.
-         */
         if (
             hasLoadedSchedule &&
             signature ===
@@ -533,10 +783,22 @@
         lastScheduleSignature =
             signature;
 
-        const content =
-            document.createDocumentFragment();
+        animationVersion += 1;
 
-        content.appendChild(
+        const thisAnimationVersion =
+            animationVersion;
+
+        scheduleLine.classList.remove(
+            "is-hidden"
+        );
+
+        const track =
+            document.createElement("div");
+
+        track.className =
+            "schedule-track no-transition";
+
+        track.appendChild(
             createScheduleItem(
                 "NOW",
                 selectedEntries.now,
@@ -546,11 +808,11 @@
             )
         );
 
-        content.appendChild(
+        track.appendChild(
             createSeparator()
         );
 
-        content.appendChild(
+        track.appendChild(
             createScheduleItem(
                 "NEXT",
                 selectedEntries.next,
@@ -558,11 +820,11 @@
             )
         );
 
-        content.appendChild(
+        track.appendChild(
             createSeparator()
         );
 
-        content.appendChild(
+        track.appendChild(
             createScheduleItem(
                 "AFTER",
                 selectedEntries.after,
@@ -570,28 +832,71 @@
             )
         );
 
+        track.appendChild(
+            createSeparator()
+        );
+
+        track.appendChild(
+            createScheduleItem(
+                "LATER",
+                selectedEntries.later,
+                "NO LATER SLOT"
+            )
+        );
+
         scheduleLine.replaceChildren(
-            content
+            track
         );
 
         hasLoadedSchedule = true;
 
         /*
-         * Wait until the browser finishes laying
-         * out the new text before measuring it.
+         * Wait for Museo Sans to finish loading
+         * before measuring the text.
          */
-        window.requestAnimationFrame(() => {
-            fitScheduleText();
+        if (
+            document.fonts &&
+            document.fonts.ready
+        ) {
+            await document.fonts.ready;
+        }
 
-            if (
-                document.fonts &&
-                document.fonts.ready
-            ) {
-                document.fonts.ready.then(
-                    fitScheduleText
-                );
-            }
-        });
+        await nextFrame();
+
+        if (
+            thisAnimationVersion !==
+                animationVersion ||
+            !track.isConnected
+        ) {
+            return;
+        }
+
+        const offsets =
+            fitAndMeasureTrack(track);
+
+        track.style.transitionDuration =
+            `${SLIDE_DURATION}ms`;
+
+        track.style.transform =
+            `translateX(${offsets.initialOffset}px)`;
+
+        /*
+         * Apply the starting position without
+         * showing an animation.
+         */
+        void track.offsetWidth;
+
+        await nextFrame();
+
+        track.classList.remove(
+            "no-transition"
+        );
+
+        runAnimationCycle(
+            track,
+            offsets,
+            thisAnimationVersion
+        );
     }
 
     /*
@@ -624,7 +929,9 @@
                 await response.json();
 
             const normalizedSchedule =
-                normalizeSchedule(schedule);
+                normalizeSchedule(
+                    schedule
+                );
 
             if (
                 normalizedSchedule.length === 0
@@ -639,7 +946,7 @@
                     normalizedSchedule
                 );
 
-            displaySchedule(
+            await displaySchedule(
                 selectedEntries
             );
         } catch (error) {
@@ -649,15 +956,12 @@
             );
 
             /*
-             * If a schedule has already loaded,
-             * leave the last successful information
-             * on screen rather than replacing it.
+             * Keep the last successful schedule
+             * visible if a later refresh fails.
              */
             if (!hasLoadedSchedule) {
                 scheduleLine.textContent =
                     "SCHEDULE TEMPORARILY UNAVAILABLE";
-
-                fitScheduleText();
             }
         }
     }
