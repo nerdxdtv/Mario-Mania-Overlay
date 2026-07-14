@@ -1,26 +1,26 @@
 {
-    "defaultDuration": 8000,
-    "transitionDuration": 700,
-    "slides": [
-        {
-            "image": "../assets/rotator/march-of-dimes.png",
-            "alt": "March of Dimes",
-            "duration": 8000
-        },
-        {
-            "image": "../assets/rotator/donate.png",
-            "alt": "Donate to Mario Mania",
-            "duration": 8000
-        },
-        {
-            "image": "../assets/rotator/merch.png",
-            "alt": "Mario Mania merchandise",
-            "duration": 8000
-        },
-        {
-            "image": "../assets/rotator/schedule.png",
-            "alt": "Mario Mania schedule",
-            "duration": 8000
-        }
-    ]
+  "defaultDuration": 8000,
+  "transitionDuration": 700,
+  "slides": [
+    {
+      "file": "march-of-dimes.png",
+      "alt": "March of Dimes",
+      "duration": 8000
+    },
+    {
+      "file": "donate.png",
+      "alt": "Donate to Mario Mania",
+      "duration": 8000
+    },
+    {
+      "file": "merch.png",
+      "alt": "Mario Mania merchandise",
+      "duration": 8000
+    },
+    {
+      "file": "schedule.png",
+      "alt": "Mario Mania schedule",
+      "duration": 8000
+    }
+  ]
 }
