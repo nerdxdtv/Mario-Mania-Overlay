@@ -6,6 +6,18 @@
  * remain controlled by overlay.css.
  */
 
+/*
+ * Shared rotator behavior
+ *
+ * The black container background becomes visible while
+ * the rotator image fades out between slides.
+ */
+
+.info-rotator {
+  background: #000000;
+  overflow: hidden;
+}
+
 .info-rotator .rotator-image {
   width: 100%;
   height: 100%;
