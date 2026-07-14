@@ -1,0 +1,252 @@
+{
+  "eventName": "Mario Mania Marathon 2027",
+  "timeZone": "America/New_York",
+  "status": "placeholder-test-data",
+  "entries": [
+    {
+      "id": "mmm27-001",
+      "startUtc": "2027-03-26T16:00:00Z",
+      "durationMinutes": 15,
+      "gameTitle": "KICK-OFF MARIO MANIA",
+      "streamerName": "NerdXD"
+    },
+    {
+      "id": "mmm27-002",
+      "startUtc": "2027-03-26T16:15:00Z",
+      "durationMinutes": 105,
+      "gameTitle": "Super Mario Bros.",
+      "streamerName": "TestRunner1"
+    },
+    {
+      "id": "mmm27-003",
+      "startUtc": "2027-03-26T18:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario Bros. 3",
+      "streamerName": "NerdXD"
+    },
+    {
+      "id": "mmm27-004",
+      "startUtc": "2027-03-26T20:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario World",
+      "streamerName": "TestRunner2"
+    },
+    {
+      "id": "mmm27-005",
+      "startUtc": "2027-03-26T22:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario Galaxy",
+      "streamerName": "TestRunner3"
+    },
+    {
+      "id": "mmm27-006",
+      "startUtc": "2027-03-27T00:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Mario Party Superstars",
+      "streamerName": "TestRunner4"
+    },
+    {
+      "id": "mmm27-007",
+      "startUtc": "2027-03-27T02:00:00Z",
+      "durationMinutes": 15,
+      "gameTitle": "Daily Recap",
+      "streamerName": "NerdXD"
+    },
+    {
+      "id": "mmm27-008",
+      "startUtc": "2027-03-27T02:15:00Z",
+      "durationMinutes": 105,
+      "gameTitle": "Mario Kart World 4P VS Race",
+      "streamerName": "NerdXD"
+    },
+    {
+      "id": "mmm27-009",
+      "startUtc": "2027-03-27T04:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Paper Mario: The Thousand Year Door",
+      "streamerName": "TestRunner5"
+    },
+    {
+      "id": "mmm27-010",
+      "startUtc": "2027-03-27T06:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario RPG",
+      "streamerName": "TestRunner6"
+    },
+    {
+      "id": "mmm27-011",
+      "startUtc": "2027-03-27T08:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Mario & Luigi: Brothership",
+      "streamerName": "TestRunner7"
+    },
+    {
+      "id": "mmm27-012",
+      "startUtc": "2027-03-27T10:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario 3D Land",
+      "streamerName": "TestRunner8"
+    },
+    {
+      "id": "mmm27-013",
+      "startUtc": "2027-03-27T12:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "New Super Mario Bros.",
+      "streamerName": "TestRunner9"
+    },
+    {
+      "id": "mmm27-014",
+      "startUtc": "2027-03-27T14:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "New Super Mario Bros. Wii",
+      "streamerName": "TestRunner10"
+    },
+    {
+      "id": "mmm27-015",
+      "startUtc": "2027-03-27T16:00:00Z",
+      "durationMinutes": 15,
+      "gameTitle": "Prize Block",
+      "streamerName": "NerdXD"
+    },
+    {
+      "id": "mmm27-016",
+      "startUtc": "2027-03-27T16:15:00Z",
+      "durationMinutes": 105,
+      "gameTitle": "New Super Mario Bros. 2",
+      "streamerName": "TestRunner11"
+    },
+    {
+      "id": "mmm27-017",
+      "startUtc": "2027-03-27T18:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "New Super Mario Bros. U",
+      "streamerName": "TestRunner12"
+    },
+    {
+      "id": "mmm27-018",
+      "startUtc": "2027-03-27T20:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario World 2: Yoshi's Island",
+      "streamerName": "TestRunner13"
+    },
+    {
+      "id": "mmm27-019",
+      "startUtc": "2027-03-27T22:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario Bros. 2",
+      "streamerName": "TestRunner14"
+    },
+    {
+      "id": "mmm27-020",
+      "startUtc": "2027-03-28T00:00:00Z",
+      "durationMinutes": 15,
+      "gameTitle": "Daily Recap",
+      "streamerName": "NerdXD"
+    },
+    {
+      "id": "mmm27-021",
+      "startUtc": "2027-03-28T00:15:00Z",
+      "durationMinutes": 105,
+      "gameTitle": "Super Mario Maker 2",
+      "streamerName": "TestRunner15"
+    },
+    {
+      "id": "mmm27-022",
+      "startUtc": "2027-03-28T02:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario Bros.: The Lost Levels",
+      "streamerName": "TestRunner16"
+    },
+    {
+      "id": "mmm27-023",
+      "startUtc": "2027-03-28T04:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario Sunshine",
+      "streamerName": "TestRunner17"
+    },
+    {
+      "id": "mmm27-024",
+      "startUtc": "2027-03-28T06:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario 3D World",
+      "streamerName": "TestRunner18"
+    },
+    {
+      "id": "mmm27-025",
+      "startUtc": "2027-03-28T08:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Bowser's Fury",
+      "streamerName": "TestRunner19"
+    },
+    {
+      "id": "mmm27-026",
+      "startUtc": "2027-03-28T10:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Donkey Kong",
+      "streamerName": "TestRunner20"
+    },
+    {
+      "id": "mmm27-027",
+      "startUtc": "2027-03-28T12:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario Land",
+      "streamerName": "TestRunner21"
+    },
+    {
+      "id": "mmm27-028",
+      "startUtc": "2027-03-28T14:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario Land 2",
+      "streamerName": "TestRunner22"
+    },
+    {
+      "id": "mmm27-029",
+      "startUtc": "2027-03-28T16:00:00Z",
+      "durationMinutes": 15,
+      "gameTitle": "Interview with March of Dimes",
+      "streamerName": "NerdXD"
+    },
+    {
+      "id": "mmm27-030",
+      "startUtc": "2027-03-28T16:15:00Z",
+      "durationMinutes": 105,
+      "gameTitle": "Mario Tennis Fever",
+      "streamerName": "TestRunner23"
+    },
+    {
+      "id": "mmm27-031",
+      "startUtc": "2027-03-28T18:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Mario Golf: Advance Tour",
+      "streamerName": "TestRunner24"
+    },
+    {
+      "id": "mmm27-032",
+      "startUtc": "2027-03-28T20:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario Galaxy 2",
+      "streamerName": "TestRunner25"
+    },
+    {
+      "id": "mmm27-033",
+      "startUtc": "2027-03-28T22:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario Bros. Wonder",
+      "streamerName": "TestRunner26"
+    },
+    {
+      "id": "mmm27-034",
+      "startUtc": "2027-03-29T00:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario Odyssey",
+      "streamerName": "TestRunner27"
+    },
+    {
+      "id": "mmm27-035",
+      "startUtc": "2027-03-29T02:00:00Z",
+      "durationMinutes": 120,
+      "gameTitle": "Super Mario 64",
+      "streamerName": "TestRunner28"
+    }
+  ]
+}
