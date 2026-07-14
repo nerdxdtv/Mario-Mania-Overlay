@@ -13,14 +13,21 @@
 
   <title>Mario Mania Marathon 2027 — 4:3 Overlay</title>
 
+  <!-- Shared overlay appearance and positioning -->
   <link
     rel="stylesheet"
     href="../css/overlay.css?v=12"
   >
 
+  <!-- Layout-specific rotator dimensions -->
+  <link
+    rel="stylesheet"
+    href="../css/rotator-layouts.css?v=1"
+  >
+
   <!-- Clock, rotator, and donation functionality -->
   <script
-    src="../js/overlay.js?v=8"
+    src="../js/overlay.js?v=9"
     defer
   ></script>
 
@@ -32,7 +39,10 @@
 
 </head>
 
-<body class="layout-4x3">
+<body
+  class="layout-4x3"
+  data-rotator-set="4x3"
+>
 
   <main class="overlay">
 
@@ -45,7 +55,7 @@
       <img
         id="rotator-image"
         class="rotator-image"
-        src="../assets/rotator/march-of-dimes.png"
+        src="../assets/rotator/4x3/march-of-dimes.png"
         alt="March of Dimes"
       >
 
