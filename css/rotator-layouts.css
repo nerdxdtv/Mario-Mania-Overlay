@@ -47,3 +47,15 @@
   width: 915px;
   height: 110px;
 }
+
+/*
+ * 10:9 rotator
+ * Source artwork: 915 × 110
+ */
+
+.layout-10x9 .info-rotator {
+  left: 11px;
+  top: 704px;
+  width: 915px;
+  height: 110px;
+}
