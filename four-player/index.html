@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Mario Mania Marathon 2027 — Four-Player Overlay</title>
+
+  <!-- Shared overlay appearance and positioning -->
+  <link
+    rel="stylesheet"
+    href="../css/overlay.css?v=12"
+  >
+
+  <!-- Layout-specific rotator dimensions and positioning -->
+  <link
+    rel="stylesheet"
+    href="../css/rotator-layouts.css?v=6"
+  >
+
+  <!-- Clock, informational rotator, and donation total -->
+  <script
+    src="../js/overlay.js?v=10"
+    defer
+  ></script>
+
+  <!-- Schedule and rotating message functionality -->
+  <script
+    src="../js/schedule-2027.js?v=1"
+    defer
+  ></script>
+
+</head>
+
+<body
+  class="layout-four-player"
+  data-rotator-set="four-player"
+>
+
+  <main class="overlay">
+
+    <!-- Center informational image rotator -->
+    <section
+      class="info-rotator"
+      aria-label="Mario Mania information"
+    >
+
+      <img
+        id="rotator-image"
+        class="rotator-image"
+        src="../assets/rotator/four-player/march-of-dimes.png"
+        alt="March of Dimes"
+      >
+
+    </section>
+
+    <!-- Static 1920 × 1080 overlay artwork -->
+    <img
+      class="overlay-frame"
+      src="../assets/frames/mmm27-four-player.png"
+      alt=""
+    >
+
+    <!-- Dynamic schedule and informational messages -->
+    <section
+      class="schedule-bar"
+      aria-label="Mario Mania schedule and information"
+    >
+
+      <div
+        id="schedule-line"
+        class="schedule-line"
+        aria-live="polite"
+      >
+        LOADING SCHEDULE...
+      </div>
+
+    </section>
+
+    <!-- Current Eastern date and time -->
+    <div
+      id="event-clock"
+      class="event-clock"
+      aria-label="Current Eastern date and time"
+    >
+      LOADING...
+    </div>
+
+    <!-- Live Tiltify donation total -->
+    <div
+      id="donation-total"
+      class="donation-total"
+      aria-label="Current donation total"
+    >
+      $0.00
+    </div>
+
+  </main>
+
+</body>
+
+</html>
