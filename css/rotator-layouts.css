@@ -1,0 +1,37 @@
+/*
+ * Mario Mania Marathon 2027
+ * Layout-specific rotator positioning and dimensions
+ *
+ * The clock, donation total, and schedule/message bar
+ * remain controlled by overlay.css.
+ */
+
+.info-rotator .rotator-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/*
+ * 16:9 rotator
+ * Source artwork: 537 × 110
+ */
+
+.layout-16x9 .info-rotator {
+  left: 10px;
+  top: 704px;
+  width: 537px;
+  height: 110px;
+}
+
+/*
+ * 4:3 rotator
+ * Source artwork: 915 × 110
+ */
+
+.layout-4x3 .info-rotator {
+  left: 10px;
+  top: 704px;
+  width: 915px;
+  height: 110px;
+}
