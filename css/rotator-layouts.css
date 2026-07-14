@@ -7,22 +7,131 @@
  */
 
 /*
- * Shared rotator behavior
- *
- * The black container background becomes visible while
- * the rotator image fades out between slides.
+ * ------------------------------------------------------------
+ * SHARED ROTATOR APPEARANCE
+ * ------------------------------------------------------------
  */
 
 .info-rotator {
   background: #000000;
   overflow: hidden;
+  isolation: isolate;
 }
 
+/*
+ * The rotator artwork stays below the scanline layers.
+ */
+
 .info-rotator .rotator-image {
+  position: relative;
+  z-index: 1;
+
   width: 100%;
   height: 100%;
+
   object-fit: contain;
 }
+
+/*
+ * Static horizontal CRT-style lines.
+ *
+ * The slight background movement prevents the pattern
+ * from appearing completely motionless.
+ */
+
+.info-rotator::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  pointer-events: none;
+
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      rgba(0, 0, 0, 0.12) 1px,
+      rgba(0, 0, 0, 0.12) 4px
+    );
+
+  background-position: 0 0;
+
+  animation:
+    rotator-scanline-drift 0.55s linear infinite;
+}
+
+/*
+ * Brighter scan band that moves down the screen.
+ */
+
+.info-rotator::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  top: -35%;
+
+  height: 35%;
+
+  z-index: 3;
+
+  pointer-events: none;
+
+  opacity: 0.7;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.18),
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0)
+    );
+
+  animation:
+    rotator-scan-sweep 3.5s linear infinite;
+}
+
+/*
+ * Small vertical movement of the repeating lines.
+ */
+
+@keyframes rotator-scanline-drift {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 0 4px;
+  }
+}
+
+/*
+ * Full top-to-bottom scan sweep.
+ */
+
+@keyframes rotator-scan-sweep {
+  from {
+    top: -35%;
+  }
+
+  to {
+    top: 100%;
+  }
+}
+
+/*
+ * ------------------------------------------------------------
+ * LAYOUT-SPECIFIC ROTATOR POSITIONS
+ * ------------------------------------------------------------
+ */
 
 /*
  * 16:9 rotator
@@ -50,7 +159,7 @@
 
 /*
  * 10:9 rotator
- * Source artwork: 915 × 110
+ * Source artwork: 1045 × 110
  */
 
 .layout-10x9 .info-rotator {
@@ -96,6 +205,12 @@
   height: 110px;
 }
 
+/*
+ * Four-player rotator
+ * Source artwork: 547 × 110
+ *
+ * This rotator is centered in the middle column.
+ */
 
 .layout-four-player .info-rotator {
   left: 686px;
