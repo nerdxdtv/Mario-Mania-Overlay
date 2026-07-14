@@ -73,173 +73,211 @@
     );
 
     /*
-     * ------------------------------------------------------------
-     * INFORMATIONAL IMAGE ROTATOR
-     * ------------------------------------------------------------
-     */
+ * ------------------------------------------------------------
+ * INFORMATIONAL IMAGE ROTATOR
+ * ------------------------------------------------------------
+ */
 
-    const ROTATOR_DATA_URL =
-        "../data/rotator.json";
+const ROTATOR_DATA_URL =
+  "../data/rotator.json";
 
-    const rotatorImage =
-        document.getElementById("rotator-image");
+const rotatorImage =
+  document.getElementById("rotator-image");
 
-    const fallbackSlides = [
-        {
-            image:
-                "../assets/rotator/march-of-dimes.png",
-            alt:
-                "March of Dimes",
-            duration:
-                8000
-        }
-    ];
+const rotatorSet =
+  document.body.dataset.rotatorSet || "16x9";
 
-    function wait(milliseconds) {
-        return new Promise((resolve) => {
-            window.setTimeout(
-                resolve,
-                milliseconds
-            );
-        });
+const ROTATOR_IMAGE_BASE_URL =
+  `../assets/rotator/${rotatorSet}/`;
+
+const fallbackSlides = [
+  {
+    file: "march-of-dimes.png",
+    alt: "March of Dimes",
+    duration: 8000
+  }
+];
+
+function wait(milliseconds) {
+  return new Promise((resolve) => {
+    window.setTimeout(
+      resolve,
+      milliseconds
+    );
+  });
+}
+
+function preloadImage(source) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+
+    image.onload = resolve;
+    image.onerror = reject;
+    image.src = source;
+  });
+}
+
+function resolveSlideSource(slide) {
+  const fileName =
+    typeof slide.file === "string"
+      ? slide.file.trim()
+      : "";
+
+  if (fileName) {
+    return `${ROTATOR_IMAGE_BASE_URL}${fileName}`;
+  }
+
+  /*
+   * Temporary support for older rotator.json entries
+   * that still contain a complete "image" path.
+   */
+
+  const legacyImagePath =
+    typeof slide.image === "string"
+      ? slide.image.trim()
+      : "";
+
+  return legacyImagePath;
+}
+
+async function displaySlide(
+  slide,
+  transitionDuration
+) {
+  if (!rotatorImage) {
+    return;
+  }
+
+  const slideSource =
+    resolveSlideSource(slide);
+
+  if (!slideSource) {
+    console.error(
+      "Rotator slide has no valid filename.",
+      slide
+    );
+
+    return;
+  }
+
+  rotatorImage.classList.remove(
+    "is-visible"
+  );
+
+  await wait(transitionDuration);
+
+  try {
+    await preloadImage(slideSource);
+  } catch (error) {
+    console.error(
+      `Unable to load rotator image: ${slideSource}`,
+      error
+    );
+
+    return;
+  }
+
+  rotatorImage.src = slideSource;
+  rotatorImage.alt = slide.alt || "";
+
+  window.requestAnimationFrame(() => {
+    rotatorImage.classList.add(
+      "is-visible"
+    );
+  });
+}
+
+async function startRotator() {
+  if (!rotatorImage) {
+    return;
+  }
+
+  let slides = fallbackSlides;
+  let defaultDuration = 8000;
+  let transitionDuration = 700;
+
+  try {
+    const response = await fetch(
+      ROTATOR_DATA_URL,
+      {
+        cache: "no-store"
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Rotator data returned status ${response.status}`
+      );
     }
 
-    function preloadImage(source) {
-        return new Promise((resolve, reject) => {
-            const image = new Image();
+    const configuration =
+      await response.json();
 
-            image.onload = resolve;
-            image.onerror = reject;
-            image.src = source;
-        });
-    }
-
-    async function displaySlide(
-        slide,
-        transitionDuration
+    if (
+      Array.isArray(configuration.slides) &&
+      configuration.slides.length > 0
     ) {
-        if (!rotatorImage) {
-            return;
-        }
-
-        rotatorImage.classList.remove(
-            "is-visible"
-        );
-
-        await wait(transitionDuration);
-
-        try {
-            await preloadImage(slide.image);
-        } catch (error) {
-            console.error(
-                `Unable to load rotator image: ${slide.image}`,
-                error
-            );
-
-            return;
-        }
-
-        rotatorImage.src = slide.image;
-        rotatorImage.alt = slide.alt || "";
-
-        window.requestAnimationFrame(() => {
-            rotatorImage.classList.add(
-                "is-visible"
-            );
-        });
+      slides = configuration.slides;
     }
 
-    async function startRotator() {
-        if (!rotatorImage) {
-            return;
-        }
-
-        let slides = fallbackSlides;
-        let defaultDuration = 8000;
-        let transitionDuration = 700;
-
-        try {
-            const response = await fetch(
-                ROTATOR_DATA_URL,
-                {
-                    cache: "no-store"
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    `Rotator data returned status ${response.status}`
-                );
-            }
-
-            const configuration =
-                await response.json();
-
-            if (
-                Array.isArray(configuration.slides) &&
-                configuration.slides.length > 0
-            ) {
-                slides = configuration.slides;
-            }
-
-            if (
-                Number.isFinite(
-                    configuration.defaultDuration
-                )
-            ) {
-                defaultDuration =
-                    configuration.defaultDuration;
-            }
-
-            if (
-                Number.isFinite(
-                    configuration.transitionDuration
-                )
-            ) {
-                transitionDuration =
-                    configuration.transitionDuration;
-            }
-        } catch (error) {
-            console.error(
-                "Unable to load rotator.json. " +
-                "Using fallback slide.",
-                error
-            );
-        }
-
-        rotatorImage.style.transitionDuration =
-            `${transitionDuration}ms`;
-
-        let currentSlideIndex = 0;
-
-        await displaySlide(
-            slides[currentSlideIndex],
-            transitionDuration
-        );
-
-        while (true) {
-            const currentSlide =
-                slides[currentSlideIndex];
-
-            const slideDuration =
-                Number.isFinite(currentSlide.duration)
-                    ? currentSlide.duration
-                    : defaultDuration;
-
-            await wait(slideDuration);
-
-            currentSlideIndex =
-                (currentSlideIndex + 1) %
-                slides.length;
-
-            await displaySlide(
-                slides[currentSlideIndex],
-                transitionDuration
-            );
-        }
+    if (
+      Number.isFinite(
+        configuration.defaultDuration
+      )
+    ) {
+      defaultDuration =
+        configuration.defaultDuration;
     }
 
-    startRotator();
+    if (
+      Number.isFinite(
+        configuration.transitionDuration
+      )
+    ) {
+      transitionDuration =
+        configuration.transitionDuration;
+    }
+  } catch (error) {
+    console.error(
+      "Unable to load rotator.json. " +
+      "Using fallback slide.",
+      error
+    );
+  }
+
+  rotatorImage.style.transitionDuration =
+    `${transitionDuration}ms`;
+
+  let currentSlideIndex = 0;
+
+  await displaySlide(
+    slides[currentSlideIndex],
+    transitionDuration
+  );
+
+  while (true) {
+    const currentSlide =
+      slides[currentSlideIndex];
+
+    const slideDuration =
+      Number.isFinite(currentSlide.duration)
+        ? currentSlide.duration
+        : defaultDuration;
+
+    await wait(slideDuration);
+
+    currentSlideIndex =
+      (currentSlideIndex + 1) %
+      slides.length;
+
+    await displaySlide(
+      slides[currentSlideIndex],
+      transitionDuration
+    );
+  }
+}
+
+startRotator();
 
     /*
      * ------------------------------------------------------------
