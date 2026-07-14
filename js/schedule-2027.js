@@ -12,8 +12,8 @@
    * ------------------------------------------------------------
    */
 
-  const SCHEDULE_URL = "../data/schedule.json";
-  const SETTINGS_URL = "../data/schedule-settings.json";
+  const SCHEDULE_URL = "../data/schedule-2027.json";
+  const SETTINGS_URL = "../data/schedule-settings-2027.json";
   const MESSAGES_URL = "../data/messages.json";
 
   const scheduleLine = document.getElementById("schedule-line");
