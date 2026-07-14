@@ -59,3 +59,15 @@
   width: 1045px;
   height: 110px;
 }
+
+/*
+ * 3:2 rotator
+ * Source artwork: 746 × 110
+ */
+
+.layout-3x2 .info-rotator {
+  left: 11px;
+  top: 704px;
+  width: 746px;
+  height: 110px;
+}
