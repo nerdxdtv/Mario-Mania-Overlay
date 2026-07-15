@@ -4,105 +4,145 @@
 
 <head>
 
-  <meta charset="UTF-8">
+ <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+ <meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+ >
 
-  <title>Mario Mania Marathon 2027 — 16:9 Overlay</title>
+ <title>Mario Mania Marathon 2027 — 16:9 Overlay</title>
 
-  <!-- Shared overlay appearance and positioning -->
-  <link
-    rel="stylesheet"
-    href="../css/overlay.css?v=12"
-  >
+ <!-- Shared overlay appearance and positioning -->
+ <link
+  rel="stylesheet"
+  href="../css/overlay.css?v=12"
+ >
 
-  <!-- Layout-specific rotator dimensions -->
-  <link
-    rel="stylesheet"
-    href="../css/rotator-layouts.css?v=1"
-  >
+ <!-- Layout-specific rotator dimensions -->
+ <link
+  rel="stylesheet"
+  href="../css/rotator-layouts.css?v=1"
+ >
 
-  <!-- Clock, rotator, and donation functionality -->
-  <script
-    src="../js/overlay.js?v=10"
-    defer
-  ></script>
+ <!-- Clock, rotator, donation, and incentive functionality -->
+ <script
+  src="../js/overlay.js?v=10"
+  defer
+ ></script>
 
-  <!-- Schedule and message functionality -->
-  <script
-    src="../js/schedule-2027.js?v=1"
-    defer
-  ></script>
+ <!-- Schedule and message functionality -->
+ <script
+  src="../js/schedule-2027.js?v=1"
+  defer
+ ></script>
 
 </head>
 
 <body
-  class="layout-16x9"
-  data-rotator-set="16x9"
+ class="layout-16x9"
+ data-rotator-set="16x9"
 >
 
-  <main class="overlay">
+ <main class="overlay">
 
-    <!-- Informational image rotator -->
-    <section
-      class="info-rotator"
-      aria-label="Mario Mania information"
-    >
+  <!-- Informational image and incentive rotator -->
+  <section
+   class="info-rotator"
+   aria-label="Mario Mania information and donation incentives"
+  >
 
-      <img
-        id="rotator-image"
-        class="rotator-image"
-        src="../assets/rotator/16x9/march-of-dimes.png"
-        alt="March of Dimes"
-      >
+   <!-- Existing informational rotator image -->
+   <img
+    id="rotator-image"
+    class="rotator-image"
+    src="../assets/rotator/16x9/march-of-dimes.png"
+    alt="March of Dimes"
+   >
 
-    </section>
+   <!-- Live Tiltify poll or milestone card -->
+   <article
+    id="incentive-card"
+    class="incentive-card"
+    aria-live="polite"
+    hidden
+   >
 
-    <!-- Static 1920 × 1080 overlay artwork -->
-    <img
-      class="overlay-frame"
-      src="../assets/frames/mmm27-16x9.png"
-      alt=""
-    >
-
-    <!-- Dynamic schedule and informational messages -->
-    <section
-      class="schedule-bar"
-      aria-label="Mario Mania schedule and information"
-    >
-
-      <div
-        id="schedule-line"
-        class="schedule-line"
-        aria-live="polite"
-      >
-        LOADING SCHEDULE...
-      </div>
-
-    </section>
-
-    <!-- Current Eastern date and time -->
+    <!-- Card type: donation poll or milestone -->
     <div
-      id="event-clock"
-      class="event-clock"
-      aria-label="Current Eastern date and time"
+     id="incentive-label"
+     class="incentive-label"
     >
-      LOADING...
+     DONATION POLL
     </div>
 
-    <!-- Live Tiltify donation total -->
+    <!-- Poll or milestone title -->
     <div
-      id="donation-total"
-      class="donation-total"
-      aria-label="Current donation total"
+     id="incentive-title"
+     class="incentive-title"
     >
-      $0.00
     </div>
 
-  </main>
+    <!-- Ranked poll options or milestone progress -->
+    <div
+     id="incentive-options"
+     class="incentive-options"
+    >
+    </div>
+
+    <!-- Poll total, milestone remaining amount, or status -->
+    <div
+     id="incentive-footer"
+     class="incentive-footer"
+    >
+    </div>
+
+   </article>
+
+  </section>
+
+  <!-- Static 1920 × 1080 overlay artwork -->
+  <img
+   class="overlay-frame"
+   src="../assets/frames/mmm27-16x9.png"
+   alt=""
+  >
+
+  <!-- Dynamic schedule and informational messages -->
+  <section
+   class="schedule-bar"
+   aria-label="Mario Mania schedule and information"
+  >
+
+   <div
+    id="schedule-line"
+    class="schedule-line"
+    aria-live="polite"
+   >
+    LOADING SCHEDULE...
+   </div>
+
+  </section>
+
+  <!-- Current Eastern date and time -->
+  <div
+   id="event-clock"
+   class="event-clock"
+   aria-label="Current Eastern date and time"
+  >
+   LOADING...
+  </div>
+
+  <!-- Live Tiltify donation total -->
+  <div
+   id="donation-total"
+   class="donation-total"
+   aria-label="Current donation total"
+  >
+   $0.00
+  </div>
+
+ </main>
 
 </body>
 
