@@ -1,11 +1,7 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
-
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
@@ -25,33 +21,30 @@
     href="../css/rotator-layouts.css?v=6"
   >
 
-  <!-- Clock, informational rotator, and donation total -->
+  <!-- Clock, rotator, donation, polls, milestones, and announcements -->
   <script
-    src="../js/overlay.js?v=10"
+    src="../js/overlay.js?v=11"
     defer
   ></script>
 
-  <!-- Schedule and rotating message functionality -->
+  <!-- Schedule and message functionality -->
   <script
     src="../js/schedule-2027.js?v=1"
     defer
   ></script>
-
 </head>
 
 <body
   class="layout-four-player"
   data-rotator-set="four-player"
 >
-
   <main class="overlay">
 
-    <!-- Center informational image rotator -->
+    <!-- Center informational images and Tiltify incentive cards -->
     <section
       class="info-rotator"
-      aria-label="Mario Mania information"
+      aria-label="Mario Mania information and donation incentives"
     >
-
       <img
         id="rotator-image"
         class="rotator-image"
@@ -59,6 +52,34 @@
         alt="March of Dimes"
       >
 
+      <article
+        id="incentive-card"
+        class="incentive-card"
+        aria-live="polite"
+        hidden
+      >
+        <div
+          id="incentive-label"
+          class="incentive-label"
+        >
+          DONATION POLL
+        </div>
+
+        <div
+          id="incentive-title"
+          class="incentive-title"
+        ></div>
+
+        <div
+          id="incentive-options"
+          class="incentive-options"
+        ></div>
+
+        <div
+          id="incentive-footer"
+          class="incentive-footer"
+        ></div>
+      </article>
     </section>
 
     <!-- Static 1920 × 1080 overlay artwork -->
@@ -73,7 +94,6 @@
       class="schedule-bar"
       aria-label="Mario Mania schedule and information"
     >
-
       <div
         id="schedule-line"
         class="schedule-line"
@@ -81,7 +101,6 @@
       >
         LOADING SCHEDULE...
       </div>
-
     </section>
 
     <!-- Current Eastern date and time -->
@@ -103,7 +122,5 @@
     </div>
 
   </main>
-
 </body>
-
 </html>
