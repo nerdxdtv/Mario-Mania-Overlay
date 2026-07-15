@@ -1,14 +1,29 @@
-//*
+/*
  * Mario Mania Marathon 2027
  * Shared overlay functionality
+ *
+ * Controls:
+ * - Eastern date and time
+ * - Tiltify donation total
+ * - Image rotator
+ * - Up to three active bid wars
+ * - Nearest unmet milestone
+ * - One-time poll and milestone announcements
  */
 
 (() => {
     "use strict";
 
-    const wait = (milliseconds) => new Promise((resolve) => {
-        window.setTimeout(resolve, milliseconds);
-    });
+    /*
+     * ------------------------------------------------------------
+     * GENERAL HELPERS
+     * ------------------------------------------------------------
+     */
+
+    const wait = (milliseconds) =>
+        new Promise((resolve) => {
+            window.setTimeout(resolve, milliseconds);
+        });
 
     const clamp = (value, minimum, maximum) =>
         Math.min(Math.max(value, minimum), maximum);
@@ -19,24 +34,40 @@
             : 1 - Math.pow(-2 * progress + 2, 3) / 2;
 
     const formatCurrency = (value, currency = "USD") => {
-        const number = Number(value);
+        const numericValue = Number(value);
 
         return new Intl.NumberFormat("en-US", {
             style: "currency",
             currency,
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
-        }).format(Number.isFinite(number) ? number : 0);
+        }).format(
+            Number.isFinite(numericValue)
+                ? numericValue
+                : 0
+        );
     };
 
     const shuffle = (items) => {
         const copy = [...items];
 
-        for (let index = copy.length - 1; index > 0; index -= 1) {
-            const randomIndex = Math.floor(Math.random() * (index + 1));
+        for (
+            let index = copy.length - 1;
+            index > 0;
+            index -= 1
+        ) {
+            const randomIndex =
+                Math.floor(
+                    Math.random() * (index + 1)
+                );
 
-            [copy[index], copy[randomIndex]] =
-                [copy[randomIndex], copy[index]];
+            [
+                copy[index],
+                copy[randomIndex]
+            ] = [
+                copy[randomIndex],
+                copy[index]
+            ];
         }
 
         return copy;
@@ -50,32 +81,62 @@
      */
 
     const clockElement =
-        document.getElementById("event-clock");
+        document.getElementById(
+            "event-clock"
+        );
 
     const easternTimeZone =
         "America/New_York";
 
     const dateFormatter =
-        new Intl.DateTimeFormat("en-US", {
-            timeZone: easternTimeZone,
-            year: "numeric",
-            month: "numeric",
-            day: "numeric"
-        });
+        new Intl.DateTimeFormat(
+            "en-US",
+            {
+                timeZone:
+                    easternTimeZone,
+
+                year:
+                    "numeric",
+
+                month:
+                    "numeric",
+
+                day:
+                    "numeric"
+            }
+        );
 
     const timeFormatter =
-        new Intl.DateTimeFormat("en-US", {
-            timeZone: easternTimeZone,
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-            timeZoneName: "short"
-        });
+        new Intl.DateTimeFormat(
+            "en-US",
+            {
+                timeZone:
+                    easternTimeZone,
 
-    const getPart = (parts, type) =>
-        parts.find((part) => {
-            return part.type === type;
-        })?.value || "";
+                hour:
+                    "numeric",
+
+                minute:
+                    "2-digit",
+
+                hour12:
+                    true,
+
+                timeZoneName:
+                    "short"
+            }
+        );
+
+    const getPart = (parts, type) => {
+        const matchingPart =
+            parts.find((part) => {
+                return part.type === type;
+            });
+
+        return matchingPart
+            ? matchingPart.value
+            : "";
+    };
 
     function updateClock() {
         if (!clockElement) {
@@ -86,31 +147,56 @@
             new Date();
 
         const dateParts =
-            dateFormatter.formatToParts(now);
+            dateFormatter.formatToParts(
+                now
+            );
 
         const timeParts =
-            timeFormatter.formatToParts(now);
+            timeFormatter.formatToParts(
+                now
+            );
 
         const year =
-            getPart(dateParts, "year");
+            getPart(
+                dateParts,
+                "year"
+            );
 
         const month =
-            getPart(dateParts, "month");
+            getPart(
+                dateParts,
+                "month"
+            );
 
         const day =
-            getPart(dateParts, "day");
+            getPart(
+                dateParts,
+                "day"
+            );
 
         const hour =
-            getPart(timeParts, "hour");
+            getPart(
+                timeParts,
+                "hour"
+            );
 
         const minute =
-            getPart(timeParts, "minute");
+            getPart(
+                timeParts,
+                "minute"
+            );
 
         const dayPeriod =
-            getPart(timeParts, "dayPeriod");
+            getPart(
+                timeParts,
+                "dayPeriod"
+            );
 
         const timeZone =
-            getPart(timeParts, "timeZoneName");
+            getPart(
+                timeParts,
+                "timeZoneName"
+            );
 
         clockElement.textContent =
             `${year}-${month}-${day} ` +
@@ -176,21 +262,34 @@
      * PERSISTENT INCENTIVE STATE
      * ------------------------------------------------------------
      *
-     * Stored separately inside each OBS Browser Source.
-     * This prevents announcements from replaying after refreshes.
+     * Each OBS Browser Source keeps its own copy.
+     * First load creates a baseline without announcements.
      */
 
     const incentiveStateStorageKey =
-        "marioManiaIncentiveStateV1";
+        "marioManiaIncentiveStateV2";
 
     const createEmptyState = () => ({
-        version: 1,
-        initialized: false,
-        pollStates: {},
-        milestoneStates: {},
-        selectedPollIds: [],
-        pendingEvents: [],
-        lastCampaignTotal: null
+        version:
+            2,
+
+        initialized:
+            false,
+
+        pollStates:
+            {},
+
+        milestoneStates:
+            {},
+
+        selectedPollIds:
+            [],
+
+        pendingEvents:
+            [],
+
+        lastCampaignTotal:
+            null
     });
 
     function loadState() {
@@ -209,7 +308,7 @@
 
             if (
                 !parsedState ||
-                parsedState.version !== 1
+                parsedState.version !== 2
             ) {
                 return createEmptyState();
             }
@@ -219,25 +318,35 @@
                 ...parsedState,
 
                 pollStates:
-                    parsedState.pollStates ||
-                    {},
+                    parsedState.pollStates &&
+                    typeof parsedState.pollStates ===
+                        "object"
+                        ? parsedState.pollStates
+                        : {},
 
                 milestoneStates:
-                    parsedState.milestoneStates ||
-                    {},
+                    parsedState.milestoneStates &&
+                    typeof parsedState
+                        .milestoneStates ===
+                        "object"
+                        ? parsedState
+                            .milestoneStates
+                        : {},
 
                 selectedPollIds:
                     Array.isArray(
                         parsedState.selectedPollIds
                     )
-                        ? parsedState.selectedPollIds
+                        ? parsedState
+                            .selectedPollIds
                         : [],
 
                 pendingEvents:
                     Array.isArray(
                         parsedState.pendingEvents
                     )
-                        ? parsedState.pendingEvents
+                        ? parsedState
+                            .pendingEvents
                         : []
             };
         } catch (error) {
@@ -269,10 +378,10 @@
         }
     }
 
-    const createEventId = (
+    function createEventId(
         prefix,
         sourceId
-    ) => {
+    ) {
         return (
             `${prefix}:${sourceId}:` +
             `${Date.now()}:` +
@@ -280,23 +389,23 @@
                 .toString(36)
                 .slice(2, 8)}`
         );
-    };
+    }
 
     function queueEvent(event) {
         const duplicate =
-            incentiveState.pendingEvents.some(
-                (queuedEvent) => {
+            incentiveState
+                .pendingEvents
+                .some((queuedEvent) => {
                     return (
                         queuedEvent.eventKey ===
                         event.eventKey
                     );
-                }
-            );
+                });
 
         if (!duplicate) {
-            incentiveState.pendingEvents.push(
-                event
-            );
+            incentiveState
+                .pendingEvents
+                .push(event);
         }
     }
 
@@ -304,11 +413,13 @@
         eventId
     ) {
         incentiveState.pendingEvents =
-            incentiveState.pendingEvents.filter(
-                (event) => {
-                    return event.id !== eventId;
-                }
-            );
+            incentiveState
+                .pendingEvents
+                .filter((event) => {
+                    return (
+                        event.id !== eventId
+                    );
+                });
 
         saveState();
     }
@@ -400,12 +511,18 @@
                                     first
                                         .amountRaised;
 
-                                return difference !== 0
-                                    ? difference
-                                    : first
+                                if (
+                                    difference !== 0
+                                ) {
+                                    return difference;
+                                }
+
+                                return (
+                                    first
                                         .originalIndex -
-                                        second
-                                            .originalIndex;
+                                    second
+                                        .originalIndex
+                                );
                             })
                             .map(({
                                 originalIndex,
@@ -425,7 +542,8 @@
                         "Unnamed bid war",
 
                     active:
-                        poll.active === true,
+                        poll.active ===
+                        true,
 
                     currency:
                         poll.currency ||
@@ -468,7 +586,8 @@
                         "Unnamed milestone",
 
                     active:
-                        milestone.active === true,
+                        milestone.active ===
+                        true,
 
                     amount:
                         Number(
@@ -561,9 +680,9 @@
         });
     }
 
-    const chooseInitialPollSelection = (
+    function chooseInitialPollSelection(
         currentlyActivePolls
-    ) => {
+    ) {
         return shuffle(
             currentlyActivePolls.map(
                 (poll) => {
@@ -574,7 +693,7 @@
             0,
             maximumSelectedPolls
         );
-    };
+    }
 
     function fillOpenPollSlots(
         selectedIds,
@@ -693,7 +812,7 @@
             };
         }
 
-        if (winners.length <= 1) {
+        if (winners.length === 1) {
             const winner =
                 winners[0];
 
@@ -729,7 +848,7 @@
     function queuePollOpenedEvents(
         poll
     ) {
-        const activationKey =
+        const activationToken =
             `${poll.id}:${Date.now()}`;
 
         queueEvent({
@@ -740,7 +859,7 @@
                 ),
 
             eventKey:
-                `poll-open:${activationKey}`,
+                `poll-open:${activationToken}`,
 
             type:
                 "poll-open-announcement",
@@ -763,7 +882,7 @@
 
             eventKey:
                 `poll-open-bid-war:` +
-                activationKey,
+                activationToken,
 
             type:
                 "priority-bid-war",
@@ -910,10 +1029,11 @@
                 ];
 
             if (
-                poll.active === true &&
+                poll.active &&
                 (
                     !previousState ||
-                    previousState.active === false
+                    previousState.active ===
+                        false
                 )
             ) {
                 newlyOpenedPolls.push(
@@ -924,7 +1044,7 @@
             if (
                 previousState?.active ===
                     true &&
-                poll.active === false
+                !poll.active
             ) {
                 newlyClosedPolls.push(
                     poll
@@ -1244,9 +1364,9 @@
     let cardAnimationVersion =
         0;
 
-    const cancelCardAnimation = () => {
+    function cancelCardAnimation() {
         cardAnimationVersion += 1;
-    };
+    }
 
     function preloadImage(source) {
         return new Promise((
@@ -1302,11 +1422,14 @@
             "is-milestone-reached"
         );
 
-        incentiveCard
-            .querySelector(
+        const existingMilestoneDisplay =
+            incentiveCard.querySelector(
                 ".milestone-display"
-            )
-            ?.remove();
+            );
+
+        if (existingMilestoneDisplay) {
+            existingMilestoneDisplay.remove();
+        }
     }
 
     async function hideRotatorContent(
@@ -1314,15 +1437,17 @@
     ) {
         cancelCardAnimation();
 
-        rotatorImage
-            ?.classList.remove(
+        if (rotatorImage) {
+            rotatorImage.classList.remove(
                 "is-visible"
             );
+        }
 
-        incentiveCard
-            ?.classList.remove(
+        if (incentiveCard) {
+            incentiveCard.classList.remove(
                 "is-visible"
             );
+        }
 
         await wait(
             transitionDuration
@@ -1379,7 +1504,8 @@
             source;
 
         rotatorImage.alt =
-            slide.alt || "";
+            slide.alt ||
+            "";
 
         window.requestAnimationFrame(
             () => {
@@ -1503,8 +1629,8 @@
             );
         }
 
-        track.append(
-            ...visibleOptions.map((
+        const optionElements =
+            visibleOptions.map((
                 option,
                 index
             ) => {
@@ -1513,7 +1639,10 @@
                     index,
                     poll.currency
                 );
-            })
+            });
+
+        track.append(
+            ...optionElements
         );
 
         incentiveOptions.replaceChildren(
@@ -2021,7 +2150,7 @@
 
     /*
      * ------------------------------------------------------------
-     * ROTATOR QUEUE AND NORMAL ROTATION
+     * QUEUED EVENTS AND NORMAL ROTATION
      * ------------------------------------------------------------
      */
 
@@ -2086,13 +2215,14 @@
         );
     }
 
-    const findPollById = (
-        pollId
-    ) => {
-        return allPolls.find((poll) => {
-            return poll.id === pollId;
-        }) || null;
-    };
+    function findPollById(pollId) {
+        return (
+            allPolls.find((poll) => {
+                return poll.id === pollId;
+            }) ||
+            null
+        );
+    }
 
     function getNextQueuedRotatorItem() {
         while (
@@ -2307,7 +2437,8 @@
                 Array.isArray(
                     configuration.slides
                 ) &&
-                configuration.slides.length
+                configuration.slides
+                    .length > 0
             ) {
                 slides =
                     configuration.slides;
@@ -2391,7 +2522,8 @@
                     queuedItem.queueEventId
                 ) {
                     completeQueuedEvent(
-                        queuedItem.queueEventId
+                        queuedItem
+                            .queueEventId
                     );
                 }
 
@@ -2420,19 +2552,24 @@
             }
 
             const currentItem =
-                items[currentItemIndex];
+                items[
+                    currentItemIndex
+                ];
 
             await displayRotatorItem(
                 currentItem,
                 transitionDuration
             );
 
-            await wait(
+            const currentDuration =
                 Number.isFinite(
                     currentItem.duration
                 )
                     ? currentItem.duration
-                    : defaultDuration
+                    : defaultDuration;
+
+            await wait(
+                currentDuration
             );
 
             currentItemIndex =
