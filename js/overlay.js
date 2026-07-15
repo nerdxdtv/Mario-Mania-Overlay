@@ -27,6 +27,19 @@
         );
     }
 
+    function clamp(value, minimum, maximum) {
+        return Math.min(
+            Math.max(value, minimum),
+            maximum
+        );
+    }
+
+    function easeInOutCubic(progress) {
+        return progress < 0.5
+            ? 4 * progress * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+    }
+
 
     /*
      * ------------------------------------------------------------
@@ -180,6 +193,7 @@
         );
 
     let activePolls = [];
+    let nextMilestone = null;
 
     async function fetchJson(url) {
         const separator =
@@ -302,6 +316,74 @@
             });
     }
 
+    function findNextMilestone(
+        milestones,
+        campaignTotal,
+        fallbackCurrency
+    ) {
+        if (!Array.isArray(milestones)) {
+            return null;
+        }
+
+        const normalizedMilestones =
+            milestones
+                .filter((milestone) => {
+                    return (
+                        milestone &&
+                        milestone.active === true
+                    );
+                })
+                .map((milestone) => {
+                    return {
+                        id:
+                            milestone.id ||
+                            null,
+
+                        name:
+                            milestone.name ||
+                            "Unnamed milestone",
+
+                        amount:
+                            Number(
+                                milestone.amount
+                            ),
+
+                        currency:
+                            milestone.currency ||
+                            fallbackCurrency ||
+                            "USD"
+                    };
+                })
+                .filter((milestone) => {
+                    return (
+                        Number.isFinite(
+                            milestone.amount
+                        ) &&
+                        milestone.amount >
+                            campaignTotal
+                    );
+                })
+                .sort((first, second) => {
+                    return (
+                        first.amount -
+                        second.amount
+                    );
+                });
+
+        if (
+            normalizedMilestones.length === 0
+        ) {
+            return null;
+        }
+
+        return {
+            ...normalizedMilestones[0],
+
+            currentAmount:
+                campaignTotal
+        };
+    }
+
     function showDonationTotal(
         campaignData
     ) {
@@ -335,6 +417,17 @@
                     campaignWorkerUrl
                 );
 
+            const campaignTotal =
+                Number(
+                    campaignData?.total
+                );
+
+            if (!Number.isFinite(campaignTotal)) {
+                throw new Error(
+                    "Campaign total is missing or invalid."
+                );
+            }
+
             showDonationTotal(
                 campaignData
             );
@@ -343,6 +436,14 @@
                 normalizePolls(
                     campaignData.polls
                 );
+
+            nextMilestone =
+                findNextMilestone(
+                    campaignData.milestones,
+                    campaignTotal,
+                    campaignData.currency ||
+                        "USD"
+                );
         } catch (workerError) {
             console.error(
                 "Unable to load live Tiltify campaign data.",
@@ -350,6 +451,7 @@
             );
 
             activePolls = [];
+            nextMilestone = null;
 
             try {
                 const fallbackData =
@@ -372,7 +474,7 @@
 
     /*
      * ------------------------------------------------------------
-     * IMAGE AND BID-WAR ROTATOR
+     * IMAGE, BID-WAR, AND MILESTONE ROTATOR
      * ------------------------------------------------------------
      */
 
@@ -380,6 +482,9 @@
         "../data/rotator.json";
 
     const bidWarCardDuration =
+        10000;
+
+    const milestoneCardDuration =
         10000;
 
     const bidWarInitialHold =
@@ -396,6 +501,12 @@
 
     const bidWarAfterShiftHold =
         150;
+
+    const milestoneInitialHold =
+        700;
+
+    const milestoneFillDuration =
+        2400;
 
     const rotatorImage =
         document.getElementById(
@@ -457,10 +568,10 @@
         }
     ];
 
-    let bidWarAnimationVersion = 0;
+    let cardAnimationVersion = 0;
 
-    function cancelBidWarAnimation() {
-        bidWarAnimationVersion += 1;
+    function cancelCardAnimation() {
+        cardAnimationVersion += 1;
     }
 
     function preloadImage(source) {
@@ -504,10 +615,29 @@
         );
     }
 
+    function resetIncentiveCardClasses() {
+        if (!incentiveCard) {
+            return;
+        }
+
+        incentiveCard.classList.remove(
+            "is-milestone"
+        );
+
+        const existingMilestoneDisplay =
+            incentiveCard.querySelector(
+                ".milestone-display"
+            );
+
+        if (existingMilestoneDisplay) {
+            existingMilestoneDisplay.remove();
+        }
+    }
+
     async function hideRotatorContent(
         transitionDuration
     ) {
-        cancelBidWarAnimation();
+        cancelCardAnimation();
 
         if (rotatorImage) {
             rotatorImage.classList.remove(
@@ -528,6 +658,8 @@
         if (incentiveCard) {
             incentiveCard.hidden =
                 true;
+
+            resetIncentiveCardClasses();
         }
     }
 
@@ -656,6 +788,8 @@
     }
 
     function paintBidWarCard(poll) {
+        resetIncentiveCardClasses();
+
         incentiveLabel.textContent =
             "BID WAR";
 
@@ -664,10 +798,6 @@
 
         incentiveFooter.textContent =
             "";
-
-        /*
-         * Only the top three options are shown.
-         */
 
         const visibleOptions =
             poll.options.slice(
@@ -734,7 +864,7 @@
         }
 
         const animationVersion =
-            ++bidWarAnimationVersion;
+            ++cardAnimationVersion;
 
         await wait(
             bidWarInitialHold
@@ -742,15 +872,11 @@
 
         if (
             animationVersion !==
-                bidWarAnimationVersion ||
+                cardAnimationVersion ||
             incentiveCard.hidden
         ) {
             return;
         }
-
-        /*
-         * Fade first place.
-         */
 
         track.classList.add(
             "is-first-faded"
@@ -763,15 +889,11 @@
 
         if (
             animationVersion !==
-                bidWarAnimationVersion ||
+                cardAnimationVersion ||
             incentiveCard.hidden
         ) {
             return;
         }
-
-        /*
-         * Move second place into the first slot.
-         */
 
         track.classList.add(
             "is-shifted"
@@ -784,15 +906,11 @@
 
         if (
             animationVersion !==
-                bidWarAnimationVersion ||
+                cardAnimationVersion ||
             incentiveCard.hidden
         ) {
             return;
         }
-
-        /*
-         * Fade third place into the second slot.
-         */
 
         track.classList.add(
             "is-third-visible"
@@ -827,6 +945,292 @@
 
                 animateBidWarTrack(
                     track
+                );
+            }
+        );
+    }
+
+    function paintMilestoneCard(
+        milestone
+    ) {
+        resetIncentiveCardClasses();
+
+        incentiveCard.classList.add(
+            "is-milestone"
+        );
+
+        incentiveLabel.textContent =
+            "NEXT MILESTONE";
+
+        incentiveTitle.textContent =
+            milestone.name;
+
+        incentiveFooter.textContent =
+            "";
+
+        const goalAmount =
+            Number(
+                milestone.amount
+            );
+
+        const currentAmount =
+            Number(
+                milestone.currentAmount
+            );
+
+        const progress =
+            goalAmount > 0
+                ? clamp(
+                    currentAmount /
+                        goalAmount,
+                    0,
+                    1
+                )
+                : 0;
+
+        const display =
+            document.createElement(
+                "div"
+            );
+
+        display.className =
+            "milestone-display";
+
+        const amounts =
+            document.createElement(
+                "div"
+            );
+
+        amounts.className =
+            "milestone-amounts";
+
+        const current =
+            document.createElement(
+                "span"
+            );
+
+        current.className =
+            "milestone-current";
+
+        current.textContent =
+            `${formatCurrency(
+                0,
+                milestone.currency
+            )} RAISED`;
+
+        const goal =
+            document.createElement(
+                "span"
+            );
+
+        goal.className =
+            "milestone-goal";
+
+        goal.textContent =
+            `${formatCurrency(
+                goalAmount,
+                milestone.currency
+            )} GOAL`;
+
+        amounts.append(
+            current,
+            goal
+        );
+
+        const progressTrack =
+            document.createElement(
+                "div"
+            );
+
+        progressTrack.className =
+            "milestone-progress-track";
+
+        const progressFill =
+            document.createElement(
+                "div"
+            );
+
+        progressFill.className =
+            "milestone-progress-fill";
+
+        progressFill.style.width =
+            "0%";
+
+        const percentage =
+            document.createElement(
+                "div"
+            );
+
+        percentage.className =
+            "milestone-percentage";
+
+        percentage.textContent =
+            "0%";
+
+        progressTrack.append(
+            progressFill,
+            percentage
+        );
+
+        display.append(
+            amounts,
+            progressTrack
+        );
+
+        incentiveOptions.replaceChildren();
+
+        incentiveCard.appendChild(
+            display
+        );
+
+        return {
+            current,
+            progressFill,
+            percentage,
+            progress,
+            currentAmount,
+
+            currency:
+                milestone.currency
+        };
+    }
+
+    function animateMilestoneNumbers(
+        elements,
+        animationVersion
+    ) {
+        const startTime =
+            performance.now();
+
+        function paintFrame(now) {
+            if (
+                animationVersion !==
+                    cardAnimationVersion ||
+                incentiveCard.hidden
+            ) {
+                return;
+            }
+
+            const elapsed =
+                now - startTime;
+
+            const rawProgress =
+                clamp(
+                    elapsed /
+                        milestoneFillDuration,
+                    0,
+                    1
+                );
+
+            const easedProgress =
+                easeInOutCubic(
+                    rawProgress
+                );
+
+            const animatedAmount =
+                elements.currentAmount *
+                easedProgress;
+
+            const animatedPercentage =
+                elements.progress *
+                easedProgress *
+                100;
+
+            elements.current.textContent =
+                `${formatCurrency(
+                    animatedAmount,
+                    elements.currency
+                )} RAISED`;
+
+            elements.percentage.textContent =
+                `${Math.round(
+                    animatedPercentage
+                )}%`;
+
+            if (rawProgress < 1) {
+                window.requestAnimationFrame(
+                    paintFrame
+                );
+
+                return;
+            }
+
+            elements.current.textContent =
+                `${formatCurrency(
+                    elements.currentAmount,
+                    elements.currency
+                )} RAISED`;
+
+            elements.percentage.textContent =
+                `${(
+                    elements.progress *
+                    100
+                ).toFixed(1)}%`;
+        }
+
+        window.requestAnimationFrame(
+            paintFrame
+        );
+    }
+
+    async function animateMilestoneCard(
+        elements
+    ) {
+        const animationVersion =
+            ++cardAnimationVersion;
+
+        await wait(
+            milestoneInitialHold
+        );
+
+        if (
+            animationVersion !==
+                cardAnimationVersion ||
+            incentiveCard.hidden
+        ) {
+            return;
+        }
+
+        elements.progressFill.style.width =
+            `${(
+                elements.progress *
+                100
+            ).toFixed(2)}%`;
+
+        animateMilestoneNumbers(
+            elements,
+            animationVersion
+        );
+    }
+
+    async function displayMilestoneCard(
+        milestone,
+        transitionDuration
+    ) {
+        if (!supportsIncentiveCards) {
+            return;
+        }
+
+        await hideRotatorContent(
+            transitionDuration
+        );
+
+        const elements =
+            paintMilestoneCard(
+                milestone
+            );
+
+        incentiveCard.hidden =
+            false;
+
+        window.requestAnimationFrame(
+            () => {
+                incentiveCard.classList.add(
+                    "is-visible"
+                );
+
+                animateMilestoneCard(
+                    elements
                 );
             }
         );
@@ -869,8 +1273,25 @@
                 };
             });
 
+        const milestoneItems =
+            nextMilestone
+                ? [
+                    {
+                        type:
+                            "milestone",
+
+                        duration:
+                            milestoneCardDuration,
+
+                        milestone:
+                            nextMilestone
+                    }
+                ]
+                : [];
+
         return imageItems.concat(
-            bidWarItems
+            bidWarItems,
+            milestoneItems
         );
     }
 
@@ -881,6 +1302,15 @@
         if (item.type === "bid-war") {
             await displayBidWarCard(
                 item.poll,
+                transitionDuration
+            );
+
+            return;
+        }
+
+        if (item.type === "milestone") {
+            await displayMilestoneCard(
+                item.milestone,
                 transitionDuration
             );
 
