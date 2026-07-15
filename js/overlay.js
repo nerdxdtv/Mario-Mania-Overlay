@@ -1,24 +1,10 @@
 /*
  * Mario Mania Marathon 2027
  * Shared overlay functionality
- *
- * This file controls:
- * - Eastern date and time
- * - Informational image and Tiltify bid-war rotator
- * - Tiltify donation total
- *
- * Schedule and message-bar functionality belongs only in:
- * js/schedule-2027.js
  */
 
 (function () {
     "use strict";
-
-    /*
-     * ------------------------------------------------------------
-     * SHARED HELPERS
-     * ------------------------------------------------------------
-     */
 
     function wait(milliseconds) {
         return new Promise((resolve) => {
@@ -26,20 +12,21 @@
         });
     }
 
-    function formatCurrency(value, currency) {
-        const numericValue = Number(value);
+    function formatCurrency(value, currency = "USD") {
+        const number = Number(value);
 
         return new Intl.NumberFormat("en-US", {
             style: "currency",
-            currency: currency || "USD",
+            currency,
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }).format(
-            Number.isFinite(numericValue)
-                ? numericValue
+            Number.isFinite(number)
+                ? number
                 : 0
         );
     }
+
 
     /*
      * ------------------------------------------------------------
@@ -47,28 +34,52 @@
      * ------------------------------------------------------------
      */
 
-    const EASTERN_TIME_ZONE =
+    const clockElement =
+        document.getElementById(
+            "event-clock"
+        );
+
+    const easternTimeZone =
         "America/New_York";
 
-    const clockElement =
-        document.getElementById("event-clock");
-
     const dateFormatter =
-        new Intl.DateTimeFormat("en-US", {
-            timeZone: EASTERN_TIME_ZONE,
-            year: "numeric",
-            month: "numeric",
-            day: "numeric"
-        });
+        new Intl.DateTimeFormat(
+            "en-US",
+            {
+                timeZone:
+                    easternTimeZone,
+
+                year:
+                    "numeric",
+
+                month:
+                    "numeric",
+
+                day:
+                    "numeric"
+            }
+        );
 
     const timeFormatter =
-        new Intl.DateTimeFormat("en-US", {
-            timeZone: EASTERN_TIME_ZONE,
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-            timeZoneName: "short"
-        });
+        new Intl.DateTimeFormat(
+            "en-US",
+            {
+                timeZone:
+                    easternTimeZone,
+
+                hour:
+                    "numeric",
+
+                minute:
+                    "2-digit",
+
+                hour12:
+                    true,
+
+                timeZoneName:
+                    "short"
+            }
+        );
 
     function getPart(parts, type) {
         const matchingPart =
@@ -86,31 +97,54 @@
             return;
         }
 
-        const now = new Date();
+        const now =
+            new Date();
 
         const dateParts =
-            dateFormatter.formatToParts(now);
+            dateFormatter.formatToParts(
+                now
+            );
 
         const timeParts =
-            timeFormatter.formatToParts(now);
+            timeFormatter.formatToParts(
+                now
+            );
 
         const year =
-            getPart(dateParts, "year");
+            getPart(
+                dateParts,
+                "year"
+            );
 
         const month =
-            getPart(dateParts, "month");
+            getPart(
+                dateParts,
+                "month"
+            );
 
         const day =
-            getPart(dateParts, "day");
+            getPart(
+                dateParts,
+                "day"
+            );
 
         const hour =
-            getPart(timeParts, "hour");
+            getPart(
+                timeParts,
+                "hour"
+            );
 
         const minute =
-            getPart(timeParts, "minute");
+            getPart(
+                timeParts,
+                "minute"
+            );
 
         const dayPeriod =
-            getPart(timeParts, "dayPeriod");
+            getPart(
+                timeParts,
+                "dayPeriod"
+            );
 
         const timeZone =
             getPart(
@@ -124,19 +158,20 @@
             `${dayPeriod} ${timeZone}`;
     }
 
+
     /*
      * ------------------------------------------------------------
      * LIVE TILTIFY CAMPAIGN DATA
      * ------------------------------------------------------------
      */
 
-    const CAMPAIGN_WORKER_URL =
+    const campaignWorkerUrl =
         "https://mario-mania-donations.kodychristian.workers.dev";
 
-    const DONATION_FALLBACK_URL =
+    const donationFallbackUrl =
         "../data/donations.json";
 
-    const CAMPAIGN_REFRESH_INTERVAL =
+    const campaignRefreshInterval =
         15000;
 
     const donationTotalElement =
@@ -146,23 +181,24 @@
 
     let activePolls = [];
 
-    async function fetchJsonData(url) {
+    async function fetchJson(url) {
         const separator =
-            url.includes("?") ? "&" : "?";
+            url.includes("?")
+                ? "&"
+                : "?";
 
-        const cacheBuster =
-            Date.now();
-
-        const response = await fetch(
-            `${url}${separator}v=${cacheBuster}`,
-            {
-                cache: "no-store"
-            }
-        );
+        const response =
+            await fetch(
+                `${url}${separator}v=${Date.now()}`,
+                {
+                    cache:
+                        "no-store"
+                }
+            );
 
         if (!response.ok) {
             throw new Error(
-                `Campaign request returned status ${response.status}.`
+                `Request failed with status ${response.status}.`
             );
         }
 
@@ -245,18 +281,12 @@
 
                 return {
                     id:
-                        poll.id || null,
+                        poll.id ||
+                        null,
 
                     name:
                         poll.name ||
                         "Unnamed bid war",
-
-                    active: true,
-
-                    amountRaised:
-                        Number(
-                            poll.amountRaised
-                        ) || 0,
 
                     currency:
                         poll.currency ||
@@ -272,7 +302,7 @@
             });
     }
 
-    function paintDonationTotal(
+    function showDonationTotal(
         campaignData
     ) {
         if (!donationTotalElement) {
@@ -280,7 +310,9 @@
         }
 
         const total =
-            Number(campaignData?.total);
+            Number(
+                campaignData?.total
+            );
 
         if (!Number.isFinite(total)) {
             throw new Error(
@@ -299,11 +331,11 @@
     async function refreshCampaignData() {
         try {
             const campaignData =
-                await fetchJsonData(
-                    CAMPAIGN_WORKER_URL
+                await fetchJson(
+                    campaignWorkerUrl
                 );
 
-            paintDonationTotal(
+            showDonationTotal(
                 campaignData
             );
 
@@ -313,9 +345,7 @@
                 );
         } catch (workerError) {
             console.error(
-                "Unable to load live Tiltify " +
-                "campaign data. Trying the " +
-                "local donation fallback.",
+                "Unable to load live Tiltify campaign data.",
                 workerError
             );
 
@@ -323,61 +353,49 @@
 
             try {
                 const fallbackData =
-                    await fetchJsonData(
-                        DONATION_FALLBACK_URL
+                    await fetchJson(
+                        donationFallbackUrl
                     );
 
-                paintDonationTotal(
+                showDonationTotal(
                     fallbackData
                 );
             } catch (fallbackError) {
                 console.error(
-                    "Unable to load fallback " +
-                    "donation total.",
+                    "Unable to load fallback donation data.",
                     fallbackError
                 );
             }
         }
     }
 
+
     /*
      * ------------------------------------------------------------
-     * INFORMATIONAL IMAGE AND BID-WAR ROTATOR
+     * IMAGE AND BID-WAR ROTATOR
      * ------------------------------------------------------------
      */
 
-    const ROTATOR_DATA_URL =
+    const rotatorDataUrl =
         "../data/rotator.json";
 
-    const BID_WAR_CARD_DURATION =
+    const bidWarCardDuration =
         10000;
 
-    /*
-     * Bid-war animation timing.
-     *
-     * First:
-     * 1st and 2nd place appear together.
-     *
-     * Then:
-     * 1st place fades.
-     * 2nd place slides into the first position.
-     * 3rd place fades into the second position.
-     */
-
-    const BID_WAR_INITIAL_HOLD =
+    const bidWarInitialHold =
         3000;
 
-    const BID_WAR_AFTER_FADE_HOLD =
-        200;
-
-    const BID_WAR_AFTER_SHIFT_HOLD =
-        150;
-
-    const BID_WAR_FIRST_FADE_DURATION =
+    const bidWarFirstFadeDuration =
         450;
 
-    const BID_WAR_SHIFT_DURATION =
+    const bidWarAfterFadeHold =
+        200;
+
+    const bidWarShiftDuration =
         650;
+
+    const bidWarAfterShiftHold =
+        150;
 
     const rotatorImage =
         document.getElementById(
@@ -418,22 +436,12 @@
             incentiveFooter
         );
 
-    /*
-     * Increasing this value cancels any bid-war
-     * animation that is currently in progress.
-     */
-
-    let bidWarAnimationVersion = 0;
-
-    function cancelBidWarAnimation() {
-        bidWarAnimationVersion += 1;
-    }
-
     const rotatorSet =
-        document.body.dataset.rotatorSet ||
+        document.body.dataset
+            .rotatorSet ||
         "16x9";
 
-    const ROTATOR_IMAGE_BASE_URL =
+    const rotatorImageBaseUrl =
         `../assets/rotator/${rotatorSet}/`;
 
     const fallbackSlides = [
@@ -448,6 +456,12 @@
                 8000
         }
     ];
+
+    let bidWarAnimationVersion = 0;
+
+    function cancelBidWarAnimation() {
+        bidWarAnimationVersion += 1;
+    }
 
     function preloadImage(source) {
         return new Promise((
@@ -470,29 +484,24 @@
 
     function resolveSlideSource(slide) {
         const fileName =
-            typeof slide.file === "string"
+            typeof slide.file ===
+            "string"
                 ? slide.file.trim()
                 : "";
 
         if (fileName) {
             return (
-                ROTATOR_IMAGE_BASE_URL +
+                rotatorImageBaseUrl +
                 fileName
             );
         }
 
-        /*
-         * Temporary support for older
-         * rotator.json entries that contain
-         * a complete image path.
-         */
-
-        const legacyImagePath =
-            typeof slide.image === "string"
+        return (
+            typeof slide.image ===
+            "string"
                 ? slide.image.trim()
-                : "";
-
-        return legacyImagePath;
+                : ""
+        );
     }
 
     async function hideRotatorContent(
@@ -530,38 +539,31 @@
             return;
         }
 
-        const slideSource =
-            resolveSlideSource(slide);
+        const source =
+            resolveSlideSource(
+                slide
+            );
 
-        if (!slideSource) {
+        if (!source) {
             console.error(
-                "Rotator slide has no " +
-                "valid filename.",
+                "Rotator slide has no valid image source.",
                 slide
             );
 
             return;
         }
 
-        await hideRotatoris-visible"
-            );
-        }
-
-        await wait(
-            transitionDuration
-        );
-
-Content(
+        await hideRotatorContent(
             transitionDuration
         );
 
         try {
             await preloadImage(
-                slideSource
+                source
             );
         } catch (error) {
             console.error(
-                `Unable to load rotator image: ${slideSource}`,
+                `Unable to load rotator image: ${source}`,
                 error
             );
 
@@ -569,7 +571,7 @@ Content(
         }
 
         rotatorImage.src =
-            slideSource;
+            source;
 
         rotatorImage.alt =
             slide.alt || "";
@@ -583,13 +585,15 @@ Content(
         );
     }
 
-    function createBidOptionElement(
+    function createBidOption(
         option,
         index,
         currency
     ) {
         const optionElement =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         optionElement.className =
             "bid-option";
@@ -601,7 +605,9 @@ Content(
         }
 
         const rankElement =
-            document.createElement("span");
+            document.createElement(
+                "span"
+            );
 
         rankElement.className =
             "bid-option-rank";
@@ -610,7 +616,9 @@ Content(
             String(index + 1);
 
         const nameElement =
-            document.createElement("span");
+            document.createElement(
+                "span"
+            );
 
         nameElement.className =
             "bid-option-name";
@@ -619,7 +627,9 @@ Content(
             option.name;
 
         const amountElement =
-            document.createElement("span");
+            document.createElement(
+                "span"
+            );
 
         amountElement.className =
             "bid-option-amount";
@@ -652,30 +662,38 @@ Content(
         incentiveTitle.textContent =
             poll.name;
 
+        incentiveFooter.textContent =
+            "";
+
         /*
-         * Only the top three options matter for
-         * this presentation.
-         *
-         * Fourth place and below are intentionally
-         * omitted from the rotator card.
+         * Only the top three options are shown.
          */
 
         const visibleOptions =
-            poll.options.slice(0, 3);
+            poll.options.slice(
+                0,
+                3
+            );
 
         const track =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         track.className =
             "bid-war-track";
 
-        if (visibleOptions.length === 1) {
+        if (
+            visibleOptions.length === 1
+        ) {
             track.classList.add(
                 "has-one-bid"
             );
         }
 
-        if (visibleOptions.length >= 3) {
+        if (
+            visibleOptions.length === 3
+        ) {
             track.classList.add(
                 "has-third-bid"
             );
@@ -686,12 +704,10 @@ Content(
                 option,
                 index
             ) => {
-                return (
-                    createBidOptionElement(
-                        option,
-                        index,
-                        poll.currency
-                    )
+                return createBidOption(
+                    option,
+                    index,
+                    poll.currency
                 );
             });
 
@@ -703,14 +719,6 @@ Content(
             track
         );
 
-        /*
-         * The combined poll total is intentionally
-         * not displayed.
-         */
-
-        incentiveFooter.textContent =
-            "";
-
         return track;
     }
 
@@ -718,7 +726,6 @@ Content(
         track
     ) {
         if (
-            !track ||
             !track.classList.contains(
                 "has-third-bid"
             )
@@ -730,7 +737,7 @@ Content(
             ++bidWarAnimationVersion;
 
         await wait(
-            BID_WAR_INITIAL_HOLD
+            bidWarInitialHold
         );
 
         if (
@@ -742,7 +749,7 @@ Content(
         }
 
         /*
-         * Fade the first-place option.
+         * Fade first place.
          */
 
         track.classList.add(
@@ -750,8 +757,8 @@ Content(
         );
 
         await wait(
-            BID_WAR_FIRST_FADE_DURATION +
-            BID_WAR_AFTER_FADE_HOLD
+            bidWarFirstFadeDuration +
+            bidWarAfterFadeHold
         );
 
         if (
@@ -771,8 +778,8 @@ Content(
         );
 
         await wait(
-            BID_WAR_SHIFT_DURATION +
-            BID_WAR_AFTER_SHIFT_HOLD
+            bidWarShiftDuration +
+            bidWarAfterShiftHold
         );
 
         if (
@@ -784,8 +791,7 @@ Content(
         }
 
         /*
-         * Fade third place into the newly opened
-         * second slot.
+         * Fade third place into the second slot.
          */
 
         track.classList.add(
@@ -806,7 +812,9 @@ Content(
         );
 
         const track =
-            paintBidWarCard(poll);
+            paintBidWarCard(
+                poll
+            );
 
         incentiveCard.hidden =
             false;
@@ -824,7 +832,9 @@ Content(
         );
     }
 
-    function buildRotatorItems(slides) {
+    function buildRotatorItems(
+        slides
+    ) {
         const imageItems =
             slides.map((slide) => {
                 return {
@@ -853,7 +863,7 @@ Content(
                         "bid-war",
 
                     duration:
-                        BID_WAR_CARD_DURATION,
+                        bidWarCardDuration,
 
                     poll
                 };
@@ -894,28 +904,17 @@ Content(
             700;
 
         try {
-            const response =
-                await fetch(
-                    `${ROTATOR_DATA_URL}?t=${Date.now()}`,
-                    {
-                        cache: "no-store"
-                    }
-                );
-
-            if (!response.ok) {
-                throw new Error(
-                    `Rotator data returned status ${response.status}.`
-                );
-            }
-
             const configuration =
-                await response.json();
+                await fetchJson(
+                    rotatorDataUrl
+                );
 
             if (
                 Array.isArray(
                     configuration.slides
                 ) &&
-                configuration.slides.length > 0
+                configuration.slides
+                    .length > 0
             ) {
                 slides =
                     configuration.slides;
@@ -944,8 +943,7 @@ Content(
             }
         } catch (error) {
             console.error(
-                "Unable to load rotator.json. " +
-                "Using the fallback slide.",
+                "Unable to load rotator.json. Using the fallback slide.",
                 error
             );
         }
@@ -981,12 +979,13 @@ Content(
                 `${transitionDuration}ms`;
         }
 
-        let currentItemIndex =
-            0;
+        let currentItemIndex = 0;
 
         while (true) {
             const items =
-                buildRotatorItems(slides);
+                buildRotatorItems(
+                    slides
+                );
 
             if (items.length === 0) {
                 await wait(
@@ -1000,19 +999,20 @@ Content(
                 currentItemIndex >=
                 items.length
             ) {
-                currentItemIndex =
-                    0;
+                currentItemIndex = 0;
             }
 
             const currentItem =
-                items[currentItemIndex];
+                items[
+                    currentItemIndex
+                ];
 
             await displayRotatorItem(
                 currentItem,
                 transitionDuration
             );
 
-            const itemDuration =
+            const duration =
                 Number.isFinite(
                     currentItem.duration
                 )
@@ -1020,7 +1020,7 @@ Content(
                     : defaultDuration;
 
             await wait(
-                itemDuration
+                duration
             );
 
             currentItemIndex =
@@ -1029,6 +1029,7 @@ Content(
                 ) % items.length;
         }
     }
+
 
     /*
      * ------------------------------------------------------------
@@ -1051,11 +1052,17 @@ Content(
             );
         })
         .finally(() => {
-            startRotator();
+            startRotator()
+                .catch((error) => {
+                    console.error(
+                        "Rotator failed to start.",
+                        error
+                    );
+                });
         });
 
     window.setInterval(
         refreshCampaignData,
-        CAMPAIGN_REFRESH_INTERVAL
+        campaignRefreshInterval
     );
 })();
