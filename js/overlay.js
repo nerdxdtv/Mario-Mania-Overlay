@@ -1,18 +1,24 @@
-/*
+//*
  * Mario Mania Marathon 2027
  * Shared overlay functionality
  */
 
-(function () {
+(() => {
     "use strict";
 
-    function wait(milliseconds) {
-        return new Promise((resolve) => {
-            window.setTimeout(resolve, milliseconds);
-        });
-    }
+    const wait = (milliseconds) => new Promise((resolve) => {
+        window.setTimeout(resolve, milliseconds);
+    });
 
-    function formatCurrency(value, currency = "USD") {
+    const clamp = (value, minimum, maximum) =>
+        Math.min(Math.max(value, minimum), maximum);
+
+    const easeInOutCubic = (progress) =>
+        progress < 0.5
+            ? 4 * progress * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+    const formatCurrency = (value, currency = "USD") => {
         const number = Number(value);
 
         return new Intl.NumberFormat("en-US", {
@@ -20,25 +26,21 @@
             currency,
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
-        }).format(
-            Number.isFinite(number)
-                ? number
-                : 0
-        );
-    }
+        }).format(Number.isFinite(number) ? number : 0);
+    };
 
-    function clamp(value, minimum, maximum) {
-        return Math.min(
-            Math.max(value, minimum),
-            maximum
-        );
-    }
+    const shuffle = (items) => {
+        const copy = [...items];
 
-    function easeInOutCubic(progress) {
-        return progress < 0.5
-            ? 4 * progress * progress * progress
-            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-    }
+        for (let index = copy.length - 1; index > 0; index -= 1) {
+            const randomIndex = Math.floor(Math.random() * (index + 1));
+
+            [copy[index], copy[randomIndex]] =
+                [copy[randomIndex], copy[index]];
+        }
+
+        return copy;
+    };
 
 
     /*
@@ -48,62 +50,32 @@
      */
 
     const clockElement =
-        document.getElementById(
-            "event-clock"
-        );
+        document.getElementById("event-clock");
 
     const easternTimeZone =
         "America/New_York";
 
     const dateFormatter =
-        new Intl.DateTimeFormat(
-            "en-US",
-            {
-                timeZone:
-                    easternTimeZone,
-
-                year:
-                    "numeric",
-
-                month:
-                    "numeric",
-
-                day:
-                    "numeric"
-            }
-        );
+        new Intl.DateTimeFormat("en-US", {
+            timeZone: easternTimeZone,
+            year: "numeric",
+            month: "numeric",
+            day: "numeric"
+        });
 
     const timeFormatter =
-        new Intl.DateTimeFormat(
-            "en-US",
-            {
-                timeZone:
-                    easternTimeZone,
+        new Intl.DateTimeFormat("en-US", {
+            timeZone: easternTimeZone,
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+            timeZoneName: "short"
+        });
 
-                hour:
-                    "numeric",
-
-                minute:
-                    "2-digit",
-
-                hour12:
-                    true,
-
-                timeZoneName:
-                    "short"
-            }
-        );
-
-    function getPart(parts, type) {
-        const matchingPart =
-            parts.find((part) => {
-                return part.type === type;
-            });
-
-        return matchingPart
-            ? matchingPart.value
-            : "";
-    }
+    const getPart = (parts, type) =>
+        parts.find((part) => {
+            return part.type === type;
+        })?.value || "";
 
     function updateClock() {
         if (!clockElement) {
@@ -114,56 +86,31 @@
             new Date();
 
         const dateParts =
-            dateFormatter.formatToParts(
-                now
-            );
+            dateFormatter.formatToParts(now);
 
         const timeParts =
-            timeFormatter.formatToParts(
-                now
-            );
+            timeFormatter.formatToParts(now);
 
         const year =
-            getPart(
-                dateParts,
-                "year"
-            );
+            getPart(dateParts, "year");
 
         const month =
-            getPart(
-                dateParts,
-                "month"
-            );
+            getPart(dateParts, "month");
 
         const day =
-            getPart(
-                dateParts,
-                "day"
-            );
+            getPart(dateParts, "day");
 
         const hour =
-            getPart(
-                timeParts,
-                "hour"
-            );
+            getPart(timeParts, "hour");
 
         const minute =
-            getPart(
-                timeParts,
-                "minute"
-            );
+            getPart(timeParts, "minute");
 
         const dayPeriod =
-            getPart(
-                timeParts,
-                "dayPeriod"
-            );
+            getPart(timeParts, "dayPeriod");
 
         const timeZone =
-            getPart(
-                timeParts,
-                "timeZoneName"
-            );
+            getPart(timeParts, "timeZoneName");
 
         clockElement.textContent =
             `${year}-${month}-${day} ` +
@@ -174,7 +121,7 @@
 
     /*
      * ------------------------------------------------------------
-     * LIVE TILTIFY CAMPAIGN DATA
+     * CONFIGURATION
      * ------------------------------------------------------------
      */
 
@@ -184,15 +131,204 @@
     const donationFallbackUrl =
         "../data/donations.json";
 
+    const rotatorDataUrl =
+        "../data/rotator.json";
+
     const campaignRefreshInterval =
         15000;
+
+    const maximumSelectedPolls =
+        3;
+
+    const bidWarCardDuration =
+        10000;
+
+    const milestoneCardDuration =
+        10000;
+
+    const announcementCardDuration =
+        8000;
+
+    const bidWarInitialHold =
+        3000;
+
+    const bidWarFirstFadeDuration =
+        450;
+
+    const bidWarAfterFadeHold =
+        200;
+
+    const bidWarShiftDuration =
+        650;
+
+    const bidWarAfterShiftHold =
+        150;
+
+    const milestoneInitialHold =
+        700;
+
+    const milestoneFillDuration =
+        2400;
+
+
+    /*
+     * ------------------------------------------------------------
+     * PERSISTENT INCENTIVE STATE
+     * ------------------------------------------------------------
+     *
+     * Stored separately inside each OBS Browser Source.
+     * This prevents announcements from replaying after refreshes.
+     */
+
+    const incentiveStateStorageKey =
+        "marioManiaIncentiveStateV1";
+
+    const createEmptyState = () => ({
+        version: 1,
+        initialized: false,
+        pollStates: {},
+        milestoneStates: {},
+        selectedPollIds: [],
+        pendingEvents: [],
+        lastCampaignTotal: null
+    });
+
+    function loadState() {
+        try {
+            const rawState =
+                window.localStorage.getItem(
+                    incentiveStateStorageKey
+                );
+
+            if (!rawState) {
+                return createEmptyState();
+            }
+
+            const parsedState =
+                JSON.parse(rawState);
+
+            if (
+                !parsedState ||
+                parsedState.version !== 1
+            ) {
+                return createEmptyState();
+            }
+
+            return {
+                ...createEmptyState(),
+                ...parsedState,
+
+                pollStates:
+                    parsedState.pollStates ||
+                    {},
+
+                milestoneStates:
+                    parsedState.milestoneStates ||
+                    {},
+
+                selectedPollIds:
+                    Array.isArray(
+                        parsedState.selectedPollIds
+                    )
+                        ? parsedState.selectedPollIds
+                        : [],
+
+                pendingEvents:
+                    Array.isArray(
+                        parsedState.pendingEvents
+                    )
+                        ? parsedState.pendingEvents
+                        : []
+            };
+        } catch (error) {
+            console.error(
+                "Unable to read saved incentive state.",
+                error
+            );
+
+            return createEmptyState();
+        }
+    }
+
+    let incentiveState =
+        loadState();
+
+    function saveState() {
+        try {
+            window.localStorage.setItem(
+                incentiveStateStorageKey,
+                JSON.stringify(
+                    incentiveState
+                )
+            );
+        } catch (error) {
+            console.error(
+                "Unable to save incentive state.",
+                error
+            );
+        }
+    }
+
+    const createEventId = (
+        prefix,
+        sourceId
+    ) => {
+        return (
+            `${prefix}:${sourceId}:` +
+            `${Date.now()}:` +
+            `${Math.random()
+                .toString(36)
+                .slice(2, 8)}`
+        );
+    };
+
+    function queueEvent(event) {
+        const duplicate =
+            incentiveState.pendingEvents.some(
+                (queuedEvent) => {
+                    return (
+                        queuedEvent.eventKey ===
+                        event.eventKey
+                    );
+                }
+            );
+
+        if (!duplicate) {
+            incentiveState.pendingEvents.push(
+                event
+            );
+        }
+    }
+
+    function completeQueuedEvent(
+        eventId
+    ) {
+        incentiveState.pendingEvents =
+            incentiveState.pendingEvents.filter(
+                (event) => {
+                    return event.id !== eventId;
+                }
+            );
+
+        saveState();
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * LIVE CAMPAIGN DATA
+     * ------------------------------------------------------------
+     */
 
     const donationTotalElement =
         document.getElementById(
             "donation-total"
         );
 
+    let allPolls = [];
     let activePolls = [];
+    let selectedActivePolls = [];
+    let allMilestones = [];
     let nextMilestone = null;
 
     async function fetchJson(url) {
@@ -225,12 +361,7 @@
         }
 
         return polls
-            .filter((poll) => {
-                return (
-                    poll &&
-                    poll.active === true
-                );
-            })
+            .filter(Boolean)
             .map((poll) => {
                 const options =
                     Array.isArray(
@@ -263,27 +394,18 @@
                                 first,
                                 second
                             ) => {
-                                const amountDifference =
+                                const difference =
                                     second
                                         .amountRaised -
                                     first
                                         .amountRaised;
 
-                                if (
-                                    amountDifference !==
-                                    0
-                                ) {
-                                    return (
-                                        amountDifference
-                                    );
-                                }
-
-                                return (
-                                    first
+                                return difference !== 0
+                                    ? difference
+                                    : first
                                         .originalIndex -
-                                    second
-                                        .originalIndex
-                                );
+                                        second
+                                            .originalIndex;
                             })
                             .map(({
                                 originalIndex,
@@ -302,86 +424,71 @@
                         poll.name ||
                         "Unnamed bid war",
 
+                    active:
+                        poll.active === true,
+
                     currency:
                         poll.currency ||
                         "USD",
+
+                    amountRaised:
+                        Number(
+                            poll.amountRaised
+                        ) || 0,
 
                     options
                 };
             })
             .filter((poll) => {
                 return (
+                    poll.id &&
                     poll.options.length > 0
                 );
             });
     }
 
-    function findNextMilestone(
+    function normalizeMilestones(
         milestones,
-        campaignTotal,
         fallbackCurrency
     ) {
         if (!Array.isArray(milestones)) {
-            return null;
+            return [];
         }
 
-        const normalizedMilestones =
-            milestones
-                .filter((milestone) => {
-                    return (
-                        milestone &&
-                        milestone.active === true
-                    );
-                })
-                .map((milestone) => {
-                    return {
-                        id:
-                            milestone.id ||
-                            null,
+        return milestones
+            .filter(Boolean)
+            .map((milestone) => {
+                return {
+                    id:
+                        milestone.id ||
+                        null,
 
-                        name:
-                            milestone.name ||
-                            "Unnamed milestone",
+                    name:
+                        milestone.name ||
+                        "Unnamed milestone",
 
-                        amount:
-                            Number(
-                                milestone.amount
-                            ),
+                    active:
+                        milestone.active === true,
 
-                        currency:
-                            milestone.currency ||
-                            fallbackCurrency ||
-                            "USD"
-                    };
-                })
-                .filter((milestone) => {
-                    return (
-                        Number.isFinite(
+                    amount:
+                        Number(
                             milestone.amount
-                        ) &&
-                        milestone.amount >
-                            campaignTotal
-                    );
-                })
-                .sort((first, second) => {
-                    return (
-                        first.amount -
-                        second.amount
-                    );
-                });
+                        ),
 
-        if (
-            normalizedMilestones.length === 0
-        ) {
-            return null;
-        }
-
-        return {
-            ...normalizedMilestones[0],
-
-            currentAmount:
-                campaignTotal
-        };
+                    currency:
+                        milestone.currency ||
+                        fallbackCurrency ||
+                        "USD"
+                };
+            })
+            .filter((milestone) => {
+                return (
+                    milestone.id &&
+                    Number.isFinite(
+                        milestone.amount
+                    )
+                );
+            });
     }
 
     function showDonationTotal(
@@ -410,6 +517,550 @@
             );
     }
 
+    function shouldResetForNewCampaign(
+        polls,
+        milestones
+    ) {
+        if (!incentiveState.initialized) {
+            return false;
+        }
+
+        const storedIds =
+            new Set([
+                ...Object.keys(
+                    incentiveState.pollStates
+                ),
+
+                ...Object.keys(
+                    incentiveState
+                        .milestoneStates
+                )
+            ]);
+
+        const currentIds = [
+            ...polls.map((poll) => {
+                return poll.id;
+            }),
+
+            ...milestones.map(
+                (milestone) => {
+                    return milestone.id;
+                }
+            )
+        ];
+
+        if (
+            storedIds.size === 0 ||
+            currentIds.length === 0
+        ) {
+            return false;
+        }
+
+        return !currentIds.some((id) => {
+            return storedIds.has(id);
+        });
+    }
+
+    const chooseInitialPollSelection = (
+        currentlyActivePolls
+    ) => {
+        return shuffle(
+            currentlyActivePolls.map(
+                (poll) => {
+                    return poll.id;
+                }
+            )
+        ).slice(
+            0,
+            maximumSelectedPolls
+        );
+    };
+
+    function fillOpenPollSlots(
+        selectedIds,
+        currentlyActivePolls
+    ) {
+        const activeIds =
+            new Set(
+                currentlyActivePolls.map(
+                    (poll) => {
+                        return poll.id;
+                    }
+                )
+            );
+
+        const cleanedSelection =
+            selectedIds.filter((
+                id,
+                index
+            ) => {
+                return (
+                    activeIds.has(id) &&
+                    selectedIds.indexOf(id) ===
+                        index
+                );
+            });
+
+        const availableIds =
+            shuffle(
+                currentlyActivePolls
+                    .map((poll) => {
+                        return poll.id;
+                    })
+                    .filter((id) => {
+                        return !cleanedSelection
+                            .includes(id);
+                    })
+            );
+
+        while (
+            cleanedSelection.length <
+                maximumSelectedPolls &&
+            availableIds.length > 0
+        ) {
+            cleanedSelection.push(
+                availableIds.shift()
+            );
+        }
+
+        return cleanedSelection.slice(
+            0,
+            maximumSelectedPolls
+        );
+    }
+
+    function promotePollIntoSelection(
+        selectedIds,
+        pollId,
+        currentlyActivePolls
+    ) {
+        const updatedSelection =
+            selectedIds.filter((id) => {
+                return id !== pollId;
+            });
+
+        updatedSelection.unshift(
+            pollId
+        );
+
+        if (
+            updatedSelection.length >
+            maximumSelectedPolls
+        ) {
+            const removalIndex =
+                1 +
+                Math.floor(
+                    Math.random() *
+                    (
+                        updatedSelection.length -
+                        1
+                    )
+                );
+
+            updatedSelection.splice(
+                removalIndex,
+                1
+            );
+        }
+
+        return fillOpenPollSlots(
+            updatedSelection,
+            currentlyActivePolls
+        );
+    }
+
+    function getPollResult(poll) {
+        const topAmount =
+            poll.options[0]
+                ?.amountRaised ||
+            0;
+
+        const winners =
+            poll.options.filter((option) => {
+                return (
+                    option.amountRaised ===
+                    topAmount
+                );
+            });
+
+        if (topAmount <= 0) {
+            return {
+                primary:
+                    "NO BIDS RECEIVED",
+
+                secondary:
+                    ""
+            };
+        }
+
+        if (winners.length <= 1) {
+            const winner =
+                winners[0];
+
+            return {
+                primary:
+                    `WINNER: ${winner.name}`,
+
+                secondary:
+                    formatCurrency(
+                        winner.amountRaised,
+                        poll.currency
+                    )
+            };
+        }
+
+        return {
+            primary:
+                "TIED WINNERS",
+
+            secondary:
+                `${winners
+                    .map((winner) => {
+                        return winner.name;
+                    })
+                    .join(" / ")} — ` +
+                `${formatCurrency(
+                    topAmount,
+                    poll.currency
+                )} EACH`
+        };
+    }
+
+    function queuePollOpenedEvents(
+        poll
+    ) {
+        const activationKey =
+            `${poll.id}:${Date.now()}`;
+
+        queueEvent({
+            id:
+                createEventId(
+                    "poll-open",
+                    poll.id
+                ),
+
+            eventKey:
+                `poll-open:${activationKey}`,
+
+            type:
+                "poll-open-announcement",
+
+            payload: {
+                pollId:
+                    poll.id,
+
+                name:
+                    poll.name
+            }
+        });
+
+        queueEvent({
+            id:
+                createEventId(
+                    "poll-open-bid-war",
+                    poll.id
+                ),
+
+            eventKey:
+                `poll-open-bid-war:` +
+                activationKey,
+
+            type:
+                "priority-bid-war",
+
+            payload: {
+                pollId:
+                    poll.id
+            }
+        });
+    }
+
+    function queuePollClosedEvent(
+        poll
+    ) {
+        const result =
+            getPollResult(poll);
+
+        queueEvent({
+            id:
+                createEventId(
+                    "poll-closed",
+                    poll.id
+                ),
+
+            eventKey:
+                `poll-closed:${poll.id}:` +
+                Date.now(),
+
+            type:
+                "poll-closed-announcement",
+
+            payload: {
+                pollId:
+                    poll.id,
+
+                name:
+                    poll.name,
+
+                primary:
+                    result.primary,
+
+                secondary:
+                    result.secondary
+            }
+        });
+    }
+
+    function queueMilestoneReachedEvent(
+        milestone
+    ) {
+        queueEvent({
+            id:
+                createEventId(
+                    "milestone-reached",
+                    milestone.id
+                ),
+
+            eventKey:
+                `milestone-reached:` +
+                milestone.id,
+
+            type:
+                "milestone-reached-announcement",
+
+            payload: {
+                milestoneId:
+                    milestone.id,
+
+                name:
+                    milestone.name,
+
+                amount:
+                    milestone.amount,
+
+                currency:
+                    milestone.currency
+            }
+        });
+    }
+
+    function initializeCampaignState(
+        polls,
+        milestones,
+        campaignTotal
+    ) {
+        incentiveState =
+            createEmptyState();
+
+        incentiveState.initialized =
+            true;
+
+        polls.forEach((poll) => {
+            incentiveState.pollStates[
+                poll.id
+            ] = {
+                active:
+                    poll.active
+            };
+        });
+
+        milestones.forEach(
+            (milestone) => {
+                incentiveState
+                    .milestoneStates[
+                        milestone.id
+                    ] = {
+                        reached:
+                            campaignTotal >=
+                            milestone.amount
+                    };
+            }
+        );
+
+        incentiveState.selectedPollIds =
+            chooseInitialPollSelection(
+                polls.filter((poll) => {
+                    return poll.active;
+                })
+            );
+
+        incentiveState.lastCampaignTotal =
+            campaignTotal;
+
+        saveState();
+    }
+
+    function processCampaignStateChanges(
+        polls,
+        milestones,
+        campaignTotal
+    ) {
+        const currentlyActivePolls =
+            polls.filter((poll) => {
+                return poll.active;
+            });
+
+        const newlyOpenedPolls = [];
+        const newlyClosedPolls = [];
+
+        polls.forEach((poll) => {
+            const previousState =
+                incentiveState.pollStates[
+                    poll.id
+                ];
+
+            if (
+                poll.active === true &&
+                (
+                    !previousState ||
+                    previousState.active === false
+                )
+            ) {
+                newlyOpenedPolls.push(
+                    poll
+                );
+            }
+
+            if (
+                previousState?.active ===
+                    true &&
+                poll.active === false
+            ) {
+                newlyClosedPolls.push(
+                    poll
+                );
+            }
+
+            incentiveState.pollStates[
+                poll.id
+            ] = {
+                active:
+                    poll.active
+            };
+        });
+
+        newlyOpenedPolls.forEach((poll) => {
+            queuePollOpenedEvents(
+                poll
+            );
+
+            incentiveState
+                .selectedPollIds =
+                promotePollIntoSelection(
+                    incentiveState
+                        .selectedPollIds,
+
+                    poll.id,
+
+                    currentlyActivePolls
+                );
+        });
+
+        newlyClosedPolls.forEach((poll) => {
+            queuePollClosedEvent(
+                poll
+            );
+        });
+
+        incentiveState.selectedPollIds =
+            fillOpenPollSlots(
+                incentiveState
+                    .selectedPollIds,
+
+                currentlyActivePolls
+            );
+
+        milestones.forEach(
+            (milestone) => {
+                const reachedNow =
+                    campaignTotal >=
+                    milestone.amount;
+
+                const previousState =
+                    incentiveState
+                        .milestoneStates[
+                            milestone.id
+                        ];
+
+                if (
+                    previousState
+                        ?.reached === false &&
+                    reachedNow &&
+                    milestone.active
+                ) {
+                    queueMilestoneReachedEvent(
+                        milestone
+                    );
+                }
+
+                incentiveState
+                    .milestoneStates[
+                        milestone.id
+                    ] = {
+                        reached:
+                            reachedNow
+                    };
+            }
+        );
+
+        incentiveState.lastCampaignTotal =
+            campaignTotal;
+
+        saveState();
+    }
+
+    function updateSelectedActivePolls() {
+        const pollById =
+            new Map(
+                activePolls.map((poll) => {
+                    return [
+                        poll.id,
+                        poll
+                    ];
+                })
+            );
+
+        selectedActivePolls =
+            incentiveState
+                .selectedPollIds
+                .map((pollId) => {
+                    return pollById.get(
+                        pollId
+                    );
+                })
+                .filter(Boolean);
+    }
+
+    function findNextMilestone(
+        milestones,
+        campaignTotal
+    ) {
+        const unmetMilestones =
+            milestones
+                .filter((milestone) => {
+                    return (
+                        milestone.active &&
+                        milestone.amount >
+                            campaignTotal
+                    );
+                })
+                .sort((first, second) => {
+                    return (
+                        first.amount -
+                        second.amount
+                    );
+                });
+
+        return unmetMilestones[0]
+            ? {
+                ...unmetMilestones[0],
+
+                currentAmount:
+                    campaignTotal
+            }
+            : null;
+    }
+
     async function refreshCampaignData() {
         try {
             const campaignData =
@@ -422,28 +1073,79 @@
                     campaignData?.total
                 );
 
-            if (!Number.isFinite(campaignTotal)) {
+            if (
+                !Number.isFinite(
+                    campaignTotal
+                )
+            ) {
                 throw new Error(
                     "Campaign total is missing or invalid."
                 );
             }
 
-            showDonationTotal(
-                campaignData
-            );
-
-            activePolls =
+            const normalizedPolls =
                 normalizePolls(
                     campaignData.polls
                 );
 
-            nextMilestone =
-                findNextMilestone(
+            const normalizedMilestones =
+                normalizeMilestones(
                     campaignData.milestones,
-                    campaignTotal,
+
                     campaignData.currency ||
                         "USD"
                 );
+
+            if (
+                shouldResetForNewCampaign(
+                    normalizedPolls,
+                    normalizedMilestones
+                )
+            ) {
+                incentiveState =
+                    createEmptyState();
+            }
+
+            if (
+                !incentiveState.initialized
+            ) {
+                initializeCampaignState(
+                    normalizedPolls,
+                    normalizedMilestones,
+                    campaignTotal
+                );
+            } else {
+                processCampaignStateChanges(
+                    normalizedPolls,
+                    normalizedMilestones,
+                    campaignTotal
+                );
+            }
+
+            allPolls =
+                normalizedPolls;
+
+            activePolls =
+                normalizedPolls.filter(
+                    (poll) => {
+                        return poll.active;
+                    }
+                );
+
+            allMilestones =
+                normalizedMilestones;
+
+            updateSelectedActivePolls();
+
+            nextMilestone =
+                findNextMilestone(
+                    allMilestones,
+                    campaignTotal
+                );
+
+            showDonationTotal(
+                campaignData
+            );
         } catch (workerError) {
             console.error(
                 "Unable to load live Tiltify campaign data.",
@@ -451,6 +1153,7 @@
             );
 
             activePolls = [];
+            selectedActivePolls = [];
             nextMilestone = null;
 
             try {
@@ -474,39 +1177,9 @@
 
     /*
      * ------------------------------------------------------------
-     * IMAGE, BID-WAR, AND MILESTONE ROTATOR
+     * ROTATOR ELEMENTS
      * ------------------------------------------------------------
      */
-
-    const rotatorDataUrl =
-        "../data/rotator.json";
-
-    const bidWarCardDuration =
-        10000;
-
-    const milestoneCardDuration =
-        10000;
-
-    const bidWarInitialHold =
-        3000;
-
-    const bidWarFirstFadeDuration =
-        450;
-
-    const bidWarAfterFadeHold =
-        200;
-
-    const bidWarShiftDuration =
-        650;
-
-    const bidWarAfterShiftHold =
-        150;
-
-    const milestoneInitialHold =
-        700;
-
-    const milestoneFillDuration =
-        2400;
 
     const rotatorImage =
         document.getElementById(
@@ -568,11 +1241,12 @@
         }
     ];
 
-    let cardAnimationVersion = 0;
+    let cardAnimationVersion =
+        0;
 
-    function cancelCardAnimation() {
+    const cancelCardAnimation = () => {
         cardAnimationVersion += 1;
-    }
+    };
 
     function preloadImage(source) {
         return new Promise((
@@ -621,17 +1295,18 @@
         }
 
         incentiveCard.classList.remove(
-            "is-milestone"
+            "is-milestone",
+            "is-announcement",
+            "is-poll-open",
+            "is-poll-closed",
+            "is-milestone-reached"
         );
 
-        const existingMilestoneDisplay =
-            incentiveCard.querySelector(
+        incentiveCard
+            .querySelector(
                 ".milestone-display"
-            );
-
-        if (existingMilestoneDisplay) {
-            existingMilestoneDisplay.remove();
-        }
+            )
+            ?.remove();
     }
 
     async function hideRotatorContent(
@@ -639,17 +1314,15 @@
     ) {
         cancelCardAnimation();
 
-        if (rotatorImage) {
-            rotatorImage.classList.remove(
+        rotatorImage
+            ?.classList.remove(
                 "is-visible"
             );
-        }
 
-        if (incentiveCard) {
-            incentiveCard.classList.remove(
+        incentiveCard
+            ?.classList.remove(
                 "is-visible"
             );
-        }
 
         await wait(
             transitionDuration
@@ -717,6 +1390,13 @@
         );
     }
 
+
+    /*
+     * ------------------------------------------------------------
+     * BID-WAR CARDS
+     * ------------------------------------------------------------
+     */
+
     function createBidOption(
         option,
         index,
@@ -772,15 +1452,9 @@
                 currency
             );
 
-        optionElement.appendChild(
-            rankElement
-        );
-
-        optionElement.appendChild(
-            nameElement
-        );
-
-        optionElement.appendChild(
+        optionElement.append(
+            rankElement,
+            nameElement,
             amountElement
         );
 
@@ -829,8 +1503,8 @@
             );
         }
 
-        const optionElements =
-            visibleOptions.map((
+        track.append(
+            ...visibleOptions.map((
                 option,
                 index
             ) => {
@@ -839,10 +1513,7 @@
                     index,
                     poll.currency
                 );
-            });
-
-        track.append(
-            ...optionElements
+            })
         );
 
         incentiveOptions.replaceChildren(
@@ -949,6 +1620,13 @@
             }
         );
     }
+
+
+    /*
+     * ------------------------------------------------------------
+     * MILESTONE CARDS
+     * ------------------------------------------------------------
+     */
 
     function paintMilestoneCard(
         milestone
@@ -1111,13 +1789,13 @@
                 return;
             }
 
-            const elapsed =
-                now - startTime;
-
             const rawProgress =
                 clamp(
-                    elapsed /
-                        milestoneFillDuration,
+                    (
+                        now -
+                        startTime
+                    ) /
+                    milestoneFillDuration,
                     0,
                     1
                 );
@@ -1127,24 +1805,19 @@
                     rawProgress
                 );
 
-            const animatedAmount =
-                elements.currentAmount *
-                easedProgress;
-
-            const animatedPercentage =
-                elements.progress *
-                easedProgress *
-                100;
-
             elements.current.textContent =
                 `${formatCurrency(
-                    animatedAmount,
+                    elements.currentAmount *
+                        easedProgress,
+
                     elements.currency
                 )} RAISED`;
 
             elements.percentage.textContent =
                 `${Math.round(
-                    animatedPercentage
+                    elements.progress *
+                    easedProgress *
+                    100
                 )}%`;
 
             if (rawProgress < 1) {
@@ -1236,7 +1909,123 @@
         );
     }
 
-    function buildRotatorItems(
+
+    /*
+     * ------------------------------------------------------------
+     * ANNOUNCEMENT CARDS
+     * ------------------------------------------------------------
+     */
+
+    function createAnnouncementBody(
+        primaryText,
+        secondaryText
+    ) {
+        const body =
+            document.createElement(
+                "div"
+            );
+
+        body.className =
+            "announcement-body";
+
+        const primary =
+            document.createElement(
+                "div"
+            );
+
+        primary.className =
+            "announcement-primary";
+
+        primary.textContent =
+            primaryText;
+
+        body.appendChild(
+            primary
+        );
+
+        if (secondaryText) {
+            const secondary =
+                document.createElement(
+                    "div"
+                );
+
+            secondary.className =
+                "announcement-secondary";
+
+            secondary.textContent =
+                secondaryText;
+
+            body.appendChild(
+                secondary
+            );
+        }
+
+        return body;
+    }
+
+    function paintAnnouncementCard(
+        announcement
+    ) {
+        resetIncentiveCardClasses();
+
+        incentiveCard.classList.add(
+            "is-announcement",
+            announcement.cardClass
+        );
+
+        incentiveLabel.textContent =
+            announcement.label;
+
+        incentiveTitle.textContent =
+            announcement.title;
+
+        incentiveFooter.textContent =
+            "";
+
+        incentiveOptions.replaceChildren(
+            createAnnouncementBody(
+                announcement.primary,
+                announcement.secondary
+            )
+        );
+    }
+
+    async function displayAnnouncementCard(
+        announcement,
+        transitionDuration
+    ) {
+        if (!supportsIncentiveCards) {
+            return;
+        }
+
+        await hideRotatorContent(
+            transitionDuration
+        );
+
+        paintAnnouncementCard(
+            announcement
+        );
+
+        incentiveCard.hidden =
+            false;
+
+        window.requestAnimationFrame(
+            () => {
+                incentiveCard.classList.add(
+                    "is-visible"
+                );
+            }
+        );
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * ROTATOR QUEUE AND NORMAL ROTATION
+     * ------------------------------------------------------------
+     */
+
+    function buildNormalRotatorItems(
         slides
     ) {
         const imageItems =
@@ -1261,17 +2050,19 @@
         }
 
         const bidWarItems =
-            activePolls.map((poll) => {
-                return {
-                    type:
-                        "bid-war",
+            selectedActivePolls.map(
+                (poll) => {
+                    return {
+                        type:
+                            "bid-war",
 
-                    duration:
-                        bidWarCardDuration,
+                        duration:
+                            bidWarCardDuration,
 
-                    poll
-                };
-            });
+                        poll
+                    };
+                }
+            );
 
         const milestoneItems =
             nextMilestone
@@ -1295,6 +2086,170 @@
         );
     }
 
+    const findPollById = (
+        pollId
+    ) => {
+        return allPolls.find((poll) => {
+            return poll.id === pollId;
+        }) || null;
+    };
+
+    function getNextQueuedRotatorItem() {
+        while (
+            incentiveState
+                .pendingEvents
+                .length > 0
+        ) {
+            const event =
+                incentiveState
+                    .pendingEvents[0];
+
+            if (
+                event.type ===
+                "poll-open-announcement"
+            ) {
+                return {
+                    type:
+                        "announcement",
+
+                    duration:
+                        announcementCardDuration,
+
+                    queueEventId:
+                        event.id,
+
+                    announcement: {
+                        cardClass:
+                            "is-poll-open",
+
+                        label:
+                            "NEW BID WAR",
+
+                        title:
+                            event.payload.name,
+
+                        primary:
+                            "BIDDING IS NOW OPEN!",
+
+                        secondary:
+                            "DONATE TO CAST YOUR BID"
+                    }
+                };
+            }
+
+            if (
+                event.type ===
+                "priority-bid-war"
+            ) {
+                const poll =
+                    findPollById(
+                        event.payload.pollId
+                    );
+
+                if (poll?.active) {
+                    return {
+                        type:
+                            "bid-war",
+
+                        duration:
+                            bidWarCardDuration,
+
+                        queueEventId:
+                            event.id,
+
+                        poll
+                    };
+                }
+
+                completeQueuedEvent(
+                    event.id
+                );
+
+                continue;
+            }
+
+            if (
+                event.type ===
+                "poll-closed-announcement"
+            ) {
+                return {
+                    type:
+                        "announcement",
+
+                    duration:
+                        announcementCardDuration,
+
+                    queueEventId:
+                        event.id,
+
+                    announcement: {
+                        cardClass:
+                            "is-poll-closed",
+
+                        label:
+                            "BIDS CLOSED",
+
+                        title:
+                            event.payload.name,
+
+                        primary:
+                            event.payload
+                                .primary,
+
+                        secondary:
+                            event.payload
+                                .secondary
+                    }
+                };
+            }
+
+            if (
+                event.type ===
+                "milestone-reached-announcement"
+            ) {
+                return {
+                    type:
+                        "announcement",
+
+                    duration:
+                        announcementCardDuration,
+
+                    queueEventId:
+                        event.id,
+
+                    announcement: {
+                        cardClass:
+                            "is-milestone-reached",
+
+                        label:
+                            "MILESTONE REACHED",
+
+                        title:
+                            event.payload.name,
+
+                        primary:
+                            `${formatCurrency(
+                                event.payload
+                                    .amount,
+
+                                event.payload
+                                    .currency
+                            )} GOAL MET!`,
+
+                        secondary:
+                            "THANK YOU!"
+                    }
+                };
+            }
+
+            completeQueuedEvent(
+                event.id
+            );
+        }
+
+        return null;
+    }
+
     async function displayRotatorItem(
         item,
         transitionDuration
@@ -1311,6 +2266,15 @@
         if (item.type === "milestone") {
             await displayMilestoneCard(
                 item.milestone,
+                transitionDuration
+            );
+
+            return;
+        }
+
+        if (item.type === "announcement") {
+            await displayAnnouncementCard(
+                item.announcement,
                 transitionDuration
             );
 
@@ -1343,8 +2307,7 @@
                 Array.isArray(
                     configuration.slides
                 ) &&
-                configuration.slides
-                    .length > 0
+                configuration.slides.length
             ) {
                 slides =
                     configuration.slides;
@@ -1390,14 +2353,12 @@
             return;
         }
 
-        const configuration =
-            await loadRotatorConfiguration();
-
         const {
             slides,
             defaultDuration,
             transitionDuration
-        } = configuration;
+        } =
+            await loadRotatorConfiguration();
 
         rotatorImage.style
             .transitionDuration =
@@ -1409,11 +2370,36 @@
                 `${transitionDuration}ms`;
         }
 
-        let currentItemIndex = 0;
+        let currentItemIndex =
+            0;
 
         while (true) {
+            const queuedItem =
+                getNextQueuedRotatorItem();
+
+            if (queuedItem) {
+                await displayRotatorItem(
+                    queuedItem,
+                    transitionDuration
+                );
+
+                await wait(
+                    queuedItem.duration
+                );
+
+                if (
+                    queuedItem.queueEventId
+                ) {
+                    completeQueuedEvent(
+                        queuedItem.queueEventId
+                    );
+                }
+
+                continue;
+            }
+
             const items =
-                buildRotatorItems(
+                buildNormalRotatorItems(
                     slides
                 );
 
@@ -1429,28 +2415,24 @@
                 currentItemIndex >=
                 items.length
             ) {
-                currentItemIndex = 0;
+                currentItemIndex =
+                    0;
             }
 
             const currentItem =
-                items[
-                    currentItemIndex
-                ];
+                items[currentItemIndex];
 
             await displayRotatorItem(
                 currentItem,
                 transitionDuration
             );
 
-            const duration =
+            await wait(
                 Number.isFinite(
                     currentItem.duration
                 )
                     ? currentItem.duration
-                    : defaultDuration;
-
-            await wait(
-                duration
+                    : defaultDuration
             );
 
             currentItemIndex =
