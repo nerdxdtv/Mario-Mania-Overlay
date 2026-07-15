@@ -2154,66 +2154,86 @@
      * ------------------------------------------------------------
      */
 
-    function buildNormalRotatorItems(
-        slides
-    ) {
-        const imageItems =
-            slides.map((slide) => {
-                return {
-                    type:
-                        "image",
+function buildNormalRotatorItems(slides) {
+  const imageItems = slides.map((slide) => {
+    return {
+      type: "image",
+      duration: Number.isFinite(slide.duration)
+        ? slide.duration
+        : null,
+      slide
+    };
+  });
 
-                    duration:
-                        Number.isFinite(
-                            slide.duration
-                        )
-                            ? slide.duration
-                            : null,
+  if (!supportsIncentiveCards) {
+    return imageItems;
+  }
 
-                    slide
-                };
-            });
+  const bidWarItems = selectedActivePolls.map((poll) => {
+    return {
+      type: "bid-war",
+      duration: bidWarCardDuration,
+      poll
+    };
+  });
 
-        if (!supportsIncentiveCards) {
-            return imageItems;
+  const milestoneItems = nextMilestone
+    ? [
+        {
+          type: "milestone",
+          duration: milestoneCardDuration,
+          milestone: nextMilestone
         }
+      ]
+    : [];
 
-        const bidWarItems =
-            selectedActivePolls.map(
-                (poll) => {
-                    return {
-                        type:
-                            "bid-war",
+  /*
+   * Keep the first selected bid war first, place the milestone next,
+   * and then continue with any remaining selected bid wars.
+   *
+   * With four informational images, three bid wars, and one milestone,
+   * the normal order becomes:
+   *
+   * Image 1 -> Bid War 1 -> Image 2 -> Milestone ->
+   * Image 3 -> Bid War 2 -> Image 4 -> Bid War 3
+   */
+  const incentiveItems = [...bidWarItems];
 
-                        duration:
-                            bidWarCardDuration,
+  if (milestoneItems.length > 0) {
+    const milestoneInsertIndex = Math.min(
+      1,
+      incentiveItems.length
+    );
 
-                        poll
-                    };
-                }
-            );
+    incentiveItems.splice(
+      milestoneInsertIndex,
+      0,
+      ...milestoneItems
+    );
+  }
 
-        const milestoneItems =
-            nextMilestone
-                ? [
-                    {
-                        type:
-                            "milestone",
+  const interleavedItems = [];
+  const longestListLength = Math.max(
+    imageItems.length,
+    incentiveItems.length
+  );
 
-                        duration:
-                            milestoneCardDuration,
-
-                        milestone:
-                            nextMilestone
-                    }
-                ]
-                : [];
-
-        return imageItems.concat(
-            bidWarItems,
-            milestoneItems
-        );
+  for (
+    let index = 0;
+    index < longestListLength;
+    index += 1
+  ) {
+    if (imageItems[index]) {
+      interleavedItems.push(imageItems[index]);
     }
+
+    if (incentiveItems[index]) {
+      interleavedItems.push(incentiveItems[index]);
+    }
+  }
+
+  return interleavedItems;
+}
 
     function findPollById(pollId) {
         return (
