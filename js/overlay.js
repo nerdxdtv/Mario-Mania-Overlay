@@ -4,7 +4,7 @@
  *
  * This file controls:
  * - Eastern date and time
- * - Informational image and Tiltify poll rotator
+ * - Informational image and Tiltify bid-war rotator
  * - Tiltify donation total
  *
  * Schedule and message-bar functionality belongs only in:
@@ -71,9 +71,10 @@
         });
 
     function getPart(parts, type) {
-        const matchingPart = parts.find((part) => {
-            return part.type === type;
-        });
+        const matchingPart =
+            parts.find((part) => {
+                return part.type === type;
+            });
 
         return matchingPart
             ? matchingPart.value
@@ -112,7 +113,10 @@
             getPart(timeParts, "dayPeriod");
 
         const timeZone =
-            getPart(timeParts, "timeZoneName");
+            getPart(
+                timeParts,
+                "timeZoneName"
+            );
 
         clockElement.textContent =
             `${year}-${month}-${day} ` +
@@ -179,7 +183,9 @@
             })
             .map((poll) => {
                 const options =
-                    Array.isArray(poll.options)
+                    Array.isArray(
+                        poll.options
+                    )
                         ? poll.options
                             .map((
                                 option,
@@ -243,7 +249,7 @@
 
                     name:
                         poll.name ||
-                        "Unnamed poll",
+                        "Unnamed bid war",
 
                     active: true,
 
@@ -336,15 +342,42 @@
 
     /*
      * ------------------------------------------------------------
-     * INFORMATIONAL IMAGE AND POLL ROTATOR
+     * INFORMATIONAL IMAGE AND BID-WAR ROTATOR
      * ------------------------------------------------------------
      */
 
     const ROTATOR_DATA_URL =
         "../data/rotator.json";
 
-    const POLL_CARD_DURATION =
+    const BID_WAR_CARD_DURATION =
         10000;
+
+    /*
+     * Bid-war animation timing.
+     *
+     * First:
+     * 1st and 2nd place appear together.
+     *
+     * Then:
+     * 1st place fades.
+     * 2nd place slides into the first position.
+     * 3rd place fades into the second position.
+     */
+
+    const BID_WAR_INITIAL_HOLD =
+        3000;
+
+    const BID_WAR_AFTER_FADE_HOLD =
+        200;
+
+    const BID_WAR_AFTER_SHIFT_HOLD =
+        150;
+
+    const BID_WAR_FIRST_FADE_DURATION =
+        450;
+
+    const BID_WAR_SHIFT_DURATION =
+        650;
 
     const rotatorImage =
         document.getElementById(
@@ -384,6 +417,17 @@
             incentiveOptions &&
             incentiveFooter
         );
+
+    /*
+     * Increasing this value cancels any bid-war
+     * animation that is currently in progress.
+     */
+
+    let bidWarAnimationVersion = 0;
+
+    function cancelBidWarAnimation() {
+        bidWarAnimationVersion += 1;
+    }
 
     const rotatorSet =
         document.body.dataset.rotatorSet ||
@@ -439,8 +483,8 @@
 
         /*
          * Temporary support for older
-         * rotator.json entries that still
-         * contain a complete "image" path.
+         * rotator.json entries that contain
+         * a complete image path.
          */
 
         const legacyImagePath =
@@ -454,6 +498,8 @@
     async function hideRotatorContent(
         transitionDuration
     ) {
+        cancelBidWarAnimation();
+
         if (rotatorImage) {
             rotatorImage.classList.remove(
                 "is-visible"
@@ -497,7 +543,15 @@
             return;
         }
 
-        await hideRotatorContent(
+        await hideRotatoris-visible"
+            );
+        }
+
+        await wait(
+            transitionDuration
+        );
+
+Content(
             transitionDuration
         );
 
@@ -529,7 +583,7 @@
         );
     }
 
-    function createPollOptionElement(
+    function createBidOptionElement(
         option,
         index,
         currency
@@ -538,7 +592,7 @@
             document.createElement("div");
 
         optionElement.className =
-            "incentive-option";
+            "bid-option";
 
         if (index === 0) {
             optionElement.classList.add(
@@ -550,7 +604,7 @@
             document.createElement("span");
 
         rankElement.className =
-            "incentive-option-rank";
+            "bid-option-rank";
 
         rankElement.textContent =
             String(index + 1);
@@ -559,7 +613,7 @@
             document.createElement("span");
 
         nameElement.className =
-            "incentive-option-name";
+            "bid-option-name";
 
         nameElement.textContent =
             option.name;
@@ -568,7 +622,7 @@
             document.createElement("span");
 
         amountElement.className =
-            "incentive-option-amount";
+            "bid-option-amount";
 
         amountElement.textContent =
             formatCurrency(
@@ -591,20 +645,49 @@
         return optionElement;
     }
 
-    function paintPollCard(poll) {
+    function paintBidWarCard(poll) {
         incentiveLabel.textContent =
-            "DONATION POLL";
+            "BID WAR";
 
         incentiveTitle.textContent =
             poll.name;
 
+        /*
+         * Only the top three options matter for
+         * this presentation.
+         *
+         * Fourth place and below are intentionally
+         * omitted from the rotator card.
+         */
+
+        const visibleOptions =
+            poll.options.slice(0, 3);
+
+        const track =
+            document.createElement("div");
+
+        track.className =
+            "bid-war-track";
+
+        if (visibleOptions.length === 1) {
+            track.classList.add(
+                "has-one-bid"
+            );
+        }
+
+        if (visibleOptions.length >= 3) {
+            track.classList.add(
+                "has-third-bid"
+            );
+        }
+
         const optionElements =
-            poll.options.map((
+            visibleOptions.map((
                 option,
                 index
             ) => {
                 return (
-                    createPollOptionElement(
+                    createBidOptionElement(
                         option,
                         index,
                         poll.currency
@@ -612,23 +695,105 @@
                 );
             });
 
-        incentiveOptions.replaceChildren(
+        track.append(
             ...optionElements
         );
 
-        incentiveFooter.textContent =
-            `${formatCurrency(
-                poll.amountRaised,
-                poll.currency
-            )} DONATED`;
+        incentiveOptions.replaceChildren(
+            track
+        );
 
-        incentiveCard.classList.toggle(
-            "has-four-options",
-            poll.options.length >= 4
+        /*
+         * The combined poll total is intentionally
+         * not displayed.
+         */
+
+        incentiveFooter.textContent =
+            "";
+
+        return track;
+    }
+
+    async function animateBidWarTrack(
+        track
+    ) {
+        if (
+            !track ||
+            !track.classList.contains(
+                "has-third-bid"
+            )
+        ) {
+            return;
+        }
+
+        const animationVersion =
+            ++bidWarAnimationVersion;
+
+        await wait(
+            BID_WAR_INITIAL_HOLD
+        );
+
+        if (
+            animationVersion !==
+                bidWarAnimationVersion ||
+            incentiveCard.hidden
+        ) {
+            return;
+        }
+
+        /*
+         * Fade the first-place option.
+         */
+
+        track.classList.add(
+            "is-first-faded"
+        );
+
+        await wait(
+            BID_WAR_FIRST_FADE_DURATION +
+            BID_WAR_AFTER_FADE_HOLD
+        );
+
+        if (
+            animationVersion !==
+                bidWarAnimationVersion ||
+            incentiveCard.hidden
+        ) {
+            return;
+        }
+
+        /*
+         * Move second place into the first slot.
+         */
+
+        track.classList.add(
+            "is-shifted"
+        );
+
+        await wait(
+            BID_WAR_SHIFT_DURATION +
+            BID_WAR_AFTER_SHIFT_HOLD
+        );
+
+        if (
+            animationVersion !==
+                bidWarAnimationVersion ||
+            incentiveCard.hidden
+        ) {
+            return;
+        }
+
+        /*
+         * Fade third place into the newly opened
+         * second slot.
+         */
+
+        track.classList.add(
+            "is-third-visible"
         );
     }
 
-    async function displayPollCard(
+    async function displayBidWarCard(
         poll,
         transitionDuration
     ) {
@@ -640,7 +805,8 @@
             transitionDuration
         );
 
-        paintPollCard(poll);
+        const track =
+            paintBidWarCard(poll);
 
         incentiveCard.hidden =
             false;
@@ -649,6 +815,10 @@
             () => {
                 incentiveCard.classList.add(
                     "is-visible"
+                );
+
+                animateBidWarTrack(
+                    track
                 );
             }
         );
@@ -676,21 +846,21 @@
             return imageItems;
         }
 
-        const pollItems =
+        const bidWarItems =
             activePolls.map((poll) => {
                 return {
                     type:
-                        "poll",
+                        "bid-war",
 
                     duration:
-                        POLL_CARD_DURATION,
+                        BID_WAR_CARD_DURATION,
 
                     poll
                 };
             });
 
         return imageItems.concat(
-            pollItems
+            bidWarItems
         );
     }
 
@@ -698,8 +868,8 @@
         item,
         transitionDuration
     ) {
-        if (item.type === "poll") {
-            await displayPollCard(
+        if (item.type === "bid-war") {
+            await displayBidWarCard(
                 item.poll,
                 transitionDuration
             );
