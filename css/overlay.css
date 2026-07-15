@@ -421,11 +421,11 @@ body {
 }
 /*
  * ------------------------------------------------------------
- * LIVE TILTIFY INCENTIVE CARD
+ * LIVE TILTIFY BID-WAR CARD
  * ------------------------------------------------------------
  *
- * The incentive card occupies the same space as the
- * informational rotator image.
+ * The bid-war card occupies the same space as the
+ * informational image rotator.
  */
 
 .incentive-card {
@@ -436,7 +436,7 @@ body {
     box-sizing: border-box;
     width: 100%;
     height: 100%;
-    padding: 6px 10px 7px;
+    padding: 5px 10px 6px;
 
     overflow: hidden;
 
@@ -444,13 +444,13 @@ body {
     background:
         radial-gradient(
             circle at top right,
-            rgba(230, 0, 18, 0.38),
-            transparent 42%
+            rgba(230, 0, 18, 0.42),
+            transparent 43%
         ),
         linear-gradient(
             135deg,
-            #1a1a1a 0%,
-            #070707 100%
+            #1b1b1b 0%,
+            #050505 100%
         );
 
     font-family:
@@ -461,6 +461,7 @@ body {
         sans-serif;
 
     opacity: 0;
+
     transition:
         opacity 700ms ease-in-out;
 
@@ -475,79 +476,56 @@ body {
     opacity: 1;
 }
 
+
 /*
- * Small card-category label.
+ * BID WAR label.
  */
 
 .incentive-label {
     position: absolute;
-    top: 6px;
+    top: 5px;
     left: 10px;
 
     color: #ffdf39;
 
-    font-size: 11px;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: 1.2px;
-
-    text-transform: uppercase;
-
-    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.65);
-    paint-order: stroke fill;
-}
-
-/*
- * Total raised for this poll or milestone status.
- * This shares the top row with the category label.
- */
-
-.incentive-footer {
-    position: absolute;
-    top: 5px;
-    right: 10px;
-
-    max-width: 245px;
-
-    color: #ffffff;
-
     font-size: 12px;
     font-weight: 900;
     line-height: 1;
-    text-align: right;
+    letter-spacing: 1.4px;
 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    text-transform: uppercase;
 
-    font-variant-numeric: tabular-nums;
+    -webkit-text-stroke:
+        1px rgba(0, 0, 0, 0.8);
 
-    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.75);
     paint-order: stroke fill;
 }
 
+
 /*
- * Poll or milestone name.
+ * Poll title.
  */
 
 .incentive-title {
     position: absolute;
-    top: 21px;
+    top: 18px;
     left: 10px;
     right: 10px;
 
     color: #ffffff;
 
-    font-size: 16px;
+    font-size: 19px;
     font-weight: 900;
-    line-height: 19px;
-    letter-spacing: -0.15px;
+    line-height: 23px;
+    letter-spacing: -0.2px;
 
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 
-    -webkit-text-stroke: 1.5px #000000;
+    -webkit-text-stroke:
+        1.5px #000000;
+
     paint-order: stroke fill;
 
     text-shadow:
@@ -555,8 +533,18 @@ body {
         2px 2px 0 rgba(0, 0, 0, 0.55);
 }
 
+
 /*
- * Ranked poll-option list.
+ * The overall poll total is intentionally hidden.
+ */
+
+.incentive-footer {
+    display: none;
+}
+
+
+/*
+ * Visible window containing two bid options.
  */
 
 .incentive-options {
@@ -566,108 +554,228 @@ body {
     right: 10px;
     bottom: 6px;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    min-height: 0;
+    min-width: 0;
     overflow: hidden;
 }
 
+
 /*
- * One poll option per line.
+ * Horizontal track holding up to three options.
+ *
+ * Two options are visible at a time. When animated,
+ * the track moves left by one option position.
  */
 
-.incentive-option {
+.bid-war-track {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+
+    width: 100%;
+    height: 100%;
+
+    transform: translateX(0);
+
+    transition:
+        transform 650ms
+        cubic-bezier(0.22, 0.72, 0.24, 1);
+}
+
+.bid-war-track.is-shifted {
+    transform:
+        translateX(
+            calc(-50% - 4px)
+        );
+}
+
+
+/*
+ * Individual bid option.
+ */
+
+.bid-option {
+    flex:
+        0 0
+        calc((100% - 8px) / 2);
+
+    box-sizing: border-box;
+    min-width: 0;
+    height: 100%;
+    padding: 5px 8px;
+
     display: grid;
     grid-template-columns:
-        19px
+        23px
+        minmax(0, 1fr);
+    grid-template-rows:
         minmax(0, 1fr)
         auto;
+    column-gap: 7px;
     align-items: center;
-    gap: 5px;
 
-    min-height: 15px;
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.32);
+
+    border-radius: 6px;
 
     color: #ffffff;
 
-    font-size: 12px;
-    font-weight: 900;
-    line-height: 15px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.13),
+            rgba(255, 255, 255, 0.045)
+        );
+
+    opacity: 1;
+
+    transition:
+        opacity 450ms ease-in-out;
 }
 
+
 /*
- * Rank number: 1, 2, 3, and so on.
+ * A one-option poll uses the full available width.
  */
 
-.incentive-option-rank {
+.bid-war-track.has-one-bid
+.bid-option {
+    flex-basis: 100%;
+}
+
+
+/*
+ * First place fades before the track moves.
+ */
+
+.bid-war-track.is-first-faded
+.bid-option:first-child {
+    opacity: 0;
+}
+
+
+/*
+ * Third place begins hidden and fades in after
+ * the track moves.
+ */
+
+.bid-war-track.has-third-bid
+.bid-option:nth-child(3) {
+    opacity: 0;
+}
+
+.bid-war-track.has-third-bid.is-third-visible
+.bid-option:nth-child(3) {
+    opacity: 1;
+}
+
+
+/*
+ * Rank badge.
+ */
+
+.bid-option-rank {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: center;
 
-    width: 16px;
-    height: 13px;
+    width: 21px;
+    height: 21px;
 
-    border-radius: 3px;
+    border-radius: 50%;
 
     color: #111111;
     background: #ffffff;
 
-    font-size: 9px;
+    font-size: 11px;
+    font-weight: 900;
     line-height: 1;
 
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric:
+        tabular-nums;
 }
 
+
 /*
- * Poll-option name.
+ * Option name.
  */
 
-.incentive-option-name {
+.bid-option-name {
+    grid-column: 2;
+    grid-row: 1;
+
     min-width: 0;
+
+    color: inherit;
+
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 16px;
 
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    -webkit-text-stroke:
+        1px rgba(0, 0, 0, 0.75);
+
+    paint-order: stroke fill;
 }
 
+
 /*
- * Poll-option dollar amount.
+ * Option dollar amount.
  */
 
-.incentive-option-amount {
-    padding-left: 5px;
+.bid-option-amount {
+    grid-column: 2;
+    grid-row: 2;
 
-    color: #ffffff;
+    min-width: 0;
 
-    text-align: right;
+    color: inherit;
+
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 19px;
+
     white-space: nowrap;
 
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric:
+        tabular-nums;
+
+    -webkit-text-stroke:
+        1px rgba(0, 0, 0, 0.75);
+
+    paint-order: stroke fill;
 }
+
 
 /*
- * Emphasize the current leading option.
+ * First-place emphasis.
  */
 
-.incentive-option.is-leading {
+.bid-option.is-leading {
     color: #ffdf39;
+
+    border-color:
+        rgba(255, 223, 57, 0.9);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 223, 57, 0.2),
+            rgba(255, 255, 255, 0.05)
+        );
 }
 
-.incentive-option.is-leading
-.incentive-option-rank {
+.bid-option.is-leading
+.bid-option-rank {
     color: #111111;
     background: #ffdf39;
-}
-
-/*
- * Slightly reduce the option text when a poll
- * contains four or more choices.
- */
-
-.incentive-card.has-four-options
-.incentive-option {
-    min-height: 14px;
-    font-size: 11px;
-    line-height: 14px;
 }
