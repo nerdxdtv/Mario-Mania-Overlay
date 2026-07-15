@@ -1006,3 +1006,288 @@ body {
 
     pointer-events: none;
 }
+
+/*
+ * ------------------------------------------------------------
+ * LIVE INCENTIVE ANNOUNCEMENT CARDS
+ * ------------------------------------------------------------
+ *
+ * Used for:
+ * - A bid war becoming active
+ * - A bid war closing
+ * - A milestone being reached
+ */
+
+.incentive-card.is-announcement {
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(230, 0, 18, 0.34),
+            transparent 58%
+        ),
+        linear-gradient(
+            135deg,
+            #1c1c1c 0%,
+            #050505 100%
+        );
+}
+
+
+/*
+ * Announcement category:
+ * NEW BID WAR, BIDS CLOSED, or MILESTONE REACHED.
+ */
+
+.incentive-card.is-announcement
+.incentive-label {
+    top: 6px;
+    left: 10px;
+    right: 10px;
+
+    color: #ffdf39;
+
+    font-size: 13px;
+    line-height: 14px;
+    letter-spacing: 1.6px;
+    text-align: center;
+}
+
+
+/*
+ * Poll or milestone name.
+ */
+
+.incentive-card.is-announcement
+.incentive-title {
+    top: 23px;
+    left: 12px;
+    right: 12px;
+
+    font-size: 20px;
+    line-height: 23px;
+    text-align: center;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/*
+ * Announcement details use the same content region
+ * normally occupied by bid options or milestone progress.
+ */
+
+.incentive-card.is-announcement
+.incentive-options {
+    top: 50px;
+    left: 12px;
+    right: 12px;
+    bottom: 7px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+
+/*
+ * Main announcement detail.
+ *
+ * Examples:
+ * BIDDING IS NOW OPEN!
+ * WINNER: ORIGINAL (NES) — $108.00
+ * $6,400.00 GOAL MET!
+ */
+
+.announcement-body {
+    width: 100%;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+
+    opacity: 0;
+    transform: scale(0.92);
+
+    transition:
+        opacity 450ms ease-out,
+        transform 650ms
+        cubic-bezier(
+            0.16,
+            1,
+            0.3,
+            1
+        );
+}
+
+.incentive-card.is-visible
+.announcement-body {
+    opacity: 1;
+    transform: scale(1);
+}
+
+
+/*
+ * Large primary message.
+ */
+
+.announcement-primary {
+    width: 100%;
+    min-width: 0;
+
+    color: #ffffff;
+
+    font-size: 19px;
+    font-weight: 900;
+    line-height: 21px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    -webkit-text-stroke:
+        1.25px rgba(0, 0, 0, 0.9);
+
+    paint-order: stroke fill;
+
+    text-shadow:
+        1px 1px 0 #000000,
+        0 0 8px rgba(255, 255, 255, 0.22);
+}
+
+
+/*
+ * Optional secondary line.
+ */
+
+.announcement-secondary {
+    width: 100%;
+    min-width: 0;
+
+    color: #ffdf39;
+
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 16px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    -webkit-text-stroke:
+        1px rgba(0, 0, 0, 0.85);
+
+    paint-order: stroke fill;
+}
+
+
+/*
+ * Newly activated bid war.
+ */
+
+.incentive-card.is-poll-open {
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(55, 205, 102, 0.32),
+            transparent 58%
+        ),
+        linear-gradient(
+            135deg,
+            #16231b 0%,
+            #050805 100%
+        );
+}
+
+.incentive-card.is-poll-open
+.announcement-primary {
+    color: #7dff9d;
+}
+
+
+/*
+ * Closed bid war.
+ */
+
+.incentive-card.is-poll-closed {
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(230, 0, 18, 0.38),
+            transparent 58%
+        ),
+        linear-gradient(
+            135deg,
+            #261416 0%,
+            #080404 100%
+        );
+}
+
+.incentive-card.is-poll-closed
+.announcement-primary {
+    color: #ffffff;
+}
+
+
+/*
+ * Reached milestone.
+ */
+
+.incentive-card.is-milestone-reached {
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(255, 223, 57, 0.46),
+            transparent 60%
+        ),
+        linear-gradient(
+            135deg,
+            #28220e 0%,
+            #080704 100%
+        );
+}
+
+.incentive-card.is-milestone-reached
+.incentive-label,
+.incentive-card.is-milestone-reached
+.announcement-primary,
+.incentive-card.is-milestone-reached
+.announcement-secondary {
+    color: #ffdf39;
+}
+
+
+/*
+ * Gentle celebration pulse.
+ */
+
+.incentive-card.is-announcement.is-visible {
+    animation:
+        incentive-celebration-pulse
+        1200ms
+        ease-in-out
+        1;
+}
+
+@keyframes incentive-celebration-pulse {
+    0% {
+        filter:
+            brightness(0.82);
+    }
+
+    45% {
+        filter:
+            brightness(1.28);
+    }
+
+    100% {
+        filter:
+            brightness(1);
+    }
+}
