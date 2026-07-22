@@ -1,0 +1,471 @@
+/*
+ * Mario Mania Marathon 2027
+ * Break Screen Overlay
+ *
+ * This file is loaded after overlay.css, so these rules override
+ * the shared gameplay-overlay positions only on the break screen.
+ */
+
+.layout-break {
+  background: transparent;
+}
+
+.layout-break .break-overlay {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: transparent;
+}
+
+/*
+ * ------------------------------------------------------------
+ * FIXED BREAK-SCREEN FRAME
+ * ------------------------------------------------------------
+ */
+
+.layout-break .break-frame {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 50;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/*
+ * ------------------------------------------------------------
+ * DONATION PARALLAX PANEL
+ * ------------------------------------------------------------
+ *
+ * The panel extends one pixel beneath the frame border so that
+ * no transparent seam appears around the opening.
+ */
+
+.layout-break .break-donation-panel {
+  position: absolute;
+  left: 10px;
+  top: 59px;
+  width: 948px;
+  height: 417px;
+  overflow: hidden;
+  background: #8ebcf2;
+  z-index: 1;
+}
+
+.layout-break .donation-parallax {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.layout-break .donation-parallax-layer {
+  position: absolute;
+  bottom: 0;
+  display: block;
+  max-width: none;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  image-rendering: pixelated;
+  will-change: transform;
+}
+
+/*
+ * Each image keeps its native size and shares the same bottom
+ * baseline. Adjust left, bottom, width, or animation distance
+ * here when fine-tuning the layer alignment.
+ */
+
+.layout-break .parallax-background {
+  left: 0;
+  bottom: 0;
+  width: 989px;
+  z-index: 1;
+  animation:
+    break-background-drift
+    54s
+    ease-in-out
+    infinite
+    alternate;
+}
+
+.layout-break .parallax-midground {
+  left: 0;
+  bottom: 0;
+  width: 984px;
+  z-index: 2;
+  animation:
+    break-midground-drift
+    38s
+    ease-in-out
+    infinite
+    alternate;
+}
+
+.layout-break .parallax-foreground {
+  left: 0;
+  bottom: 0;
+  width: 985px;
+  z-index: 3;
+  animation:
+    break-foreground-drift
+    27s
+    ease-in-out
+    infinite
+    alternate;
+}
+
+.layout-break .parallax-close-foreground {
+  left: 0;
+  bottom: 0;
+  width: 2099px;
+  z-index: 4;
+  animation:
+    break-close-foreground-drift
+    21s
+    ease-in-out
+    infinite
+    alternate;
+}
+
+@keyframes break-background-drift {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-41px);
+  }
+}
+
+@keyframes break-midground-drift {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-36px);
+  }
+}
+
+@keyframes break-foreground-drift {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-37px);
+  }
+}
+
+@keyframes break-close-foreground-drift {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-736px);
+  }
+}
+
+/*
+ * Live Tiltify donation total.
+ *
+ * The coin is baked into the frame, so the text begins to its
+ * right and remains centered in the remaining panel space.
+ */
+
+.layout-break .break-donation-total {
+  position: absolute;
+  left: 175px;
+  top: 118px;
+  width: 745px;
+  min-width: 0;
+  height: 165px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-family:
+    "MuseoSans900",
+    "Arial Black",
+    Arial,
+    Helvetica,
+    sans-serif;
+  font-size: 112px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -5px;
+  white-space: nowrap;
+  -webkit-text-stroke: 7px #000000;
+  paint-order: stroke fill;
+  text-shadow:
+    5px 5px 0 #000000,
+    8px 8px 0 rgba(0, 0, 0, 0.45);
+  z-index: 6;
+}
+
+/*
+ * ------------------------------------------------------------
+ * PRIZE PANEL
+ * ------------------------------------------------------------
+ */
+
+.layout-break .break-prize-panel {
+  position: absolute;
+  left: 10px;
+  top: 481px;
+  width: 948px;
+  height: 417px;
+  overflow: hidden;
+  background: #000000;
+  z-index: 1;
+}
+
+.layout-break .prize-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 600ms ease-in-out;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.layout-break .prize-image.is-visible {
+  opacity: 1;
+}
+
+.layout-break .break-prize-panel::after {
+  content: "PRIZES";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-family:
+    "MuseoSans900",
+    "Arial Black",
+    Arial,
+    Helvetica,
+    sans-serif;
+  font-size: 72px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  -webkit-text-stroke: 3px #000000;
+  paint-order: stroke fill;
+  pointer-events: none;
+}
+
+/*
+ * ------------------------------------------------------------
+ * BREAK-SCREEN ROTATOR
+ * ------------------------------------------------------------
+ *
+ * The uploaded break rotator images are 947 x 167 and fit the
+ * bottom-left frame opening at their native size.
+ */
+
+.layout-break .break-info-rotator {
+  position: absolute;
+  left: 10px;
+  top: 902px;
+  width: 948px;
+  height: 168px;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.layout-break .break-info-rotator .rotator-image {
+  width: 947px;
+  height: 167px;
+  display: block;
+  object-fit: cover;
+}
+
+/*
+ * Slightly enlarge the shared incentive styling for the taller
+ * break-screen rotator without altering any shared CSS.
+ */
+
+.layout-break .break-info-rotator .incentive-card {
+  padding: 8px 16px 10px;
+}
+
+.layout-break .break-info-rotator .incentive-label {
+  top: 8px;
+  left: 16px;
+  font-size: 16px;
+  letter-spacing: 1.8px;
+}
+
+.layout-break .break-info-rotator .incentive-title {
+  top: 27px;
+  left: 16px;
+  right: 16px;
+  font-size: 25px;
+  line-height: 30px;
+}
+
+.layout-break .break-info-rotator .incentive-options {
+  top: 65px;
+  left: 16px;
+  right: 16px;
+  bottom: 10px;
+}
+
+.layout-break .break-info-rotator .bid-option-rank {
+  width: 29px;
+  height: 29px;
+  font-size: 14px;
+}
+
+.layout-break .break-info-rotator .bid-option-name {
+  font-size: 19px;
+  line-height: 22px;
+}
+
+.layout-break .break-info-rotator .bid-option-amount {
+  font-size: 25px;
+  line-height: 27px;
+}
+
+.layout-break .break-info-rotator
+.incentive-card.is-milestone
+.incentive-title {
+  top: 28px;
+  font-size: 25px;
+  line-height: 29px;
+}
+
+.layout-break .break-info-rotator .milestone-display {
+  top: 68px;
+  left: 16px;
+  right: 16px;
+  bottom: 11px;
+  grid-template-rows: auto 25px;
+  row-gap: 9px;
+}
+
+.layout-break .break-info-rotator .milestone-amounts {
+  font-size: 24px;
+  line-height: 27px;
+}
+
+/*
+ * ------------------------------------------------------------
+ * INITIAL TRIVIA PLACEHOLDER
+ * ------------------------------------------------------------
+ *
+ * This establishes the right-side region. The trivia animation
+ * and JSON data will be built in a later step.
+ */
+
+.layout-break .break-trivia-panel {
+  position: absolute;
+  left: 1035px;
+  top: 125px;
+  width: 405px;
+  color: #171717;
+  font-family:
+    "MuseoSans900",
+    "Arial Black",
+    Arial,
+    Helvetica,
+    sans-serif;
+  z-index: 60;
+}
+
+.layout-break .trivia-question {
+  box-sizing: border-box;
+  min-height: 250px;
+  padding: 45px 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffd400;
+  border: 12px solid #161d17;
+  outline: 8px solid #ffffff;
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1.18;
+  text-align: center;
+  clip-path:
+    polygon(
+      14% 0,
+      86% 0,
+      100% 18%,
+      100% 82%,
+      86% 100%,
+      14% 100%,
+      0 82%,
+      0 18%
+    );
+}
+
+.layout-break .trivia-answers {
+  margin-top: 50px;
+  display: grid;
+  gap: 20px;
+}
+
+.layout-break .trivia-answer {
+  min-height: 72px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #171717;
+  background: #ffd400;
+  border: 9px solid #161d17;
+  outline: 5px solid #ffffff;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  clip-path:
+    polygon(
+      10% 0,
+      90% 0,
+      100% 28%,
+      100% 72%,
+      90% 100%,
+      10% 100%,
+      0 72%,
+      0 28%
+    );
+}
+
+.layout-break .trivia-answer.is-correct {
+  color: #ffffff;
+  background: #ff3524;
+}
+
+/*
+ * The clock exists only because overlay.js expects the standard
+ * element. It is not displayed on the break screen.
+ */
+
+.layout-break .break-hidden {
+  display: none !important;
+}
+
+/*
+ * Prevent movement for viewers or systems requesting reduced
+ * motion. OBS normally uses the animated version.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  .layout-break .donation-parallax-layer {
+    animation: none !important;
+  }
+}
