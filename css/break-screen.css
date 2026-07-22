@@ -180,18 +180,18 @@
 /*
  * Live Tiltify donation total.
  *
- * The text begins over the right side of the baked-in coin and is
- * larger than the first visual pass.
+ * The frame uses z-index 50. This total uses z-index 70 so it
+ * renders in front of the frame and overlaps the baked-in coin.
  */
 
 .layout-break .break-donation-total {
   position: absolute;
-  left: 120px;
-  top: 103px;
-  right: 16px;
+  left: 88px;
+  top: 80px;
+  right: 8px;
   width: auto;
   min-width: 0;
-  height: 190px;
+  height: 230px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -202,17 +202,18 @@
     Arial,
     Helvetica,
     sans-serif;
-  font-size: 132px;
+  font-size: 158px;
   font-weight: 900;
-  line-height: 1;
-  letter-spacing: -7px;
+  line-height: 0.95;
+  letter-spacing: -10px;
   white-space: nowrap;
-  -webkit-text-stroke: 8px #000000;
+  -webkit-text-stroke: 13px #000000;
   paint-order: stroke fill;
   text-shadow:
-    6px 6px 0 #000000,
-    10px 10px 0 rgba(0, 0, 0, 0.42);
-  z-index: 6;
+    7px 7px 0 #000000,
+    11px 11px 0 #000000,
+    15px 15px 0 rgba(0, 0, 0, 0.38);
+  z-index: 70;
 }
 
 /*
