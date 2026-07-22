@@ -186,12 +186,12 @@
 
 .layout-break .break-donation-total {
   position: absolute;
-  left: 250px;
-  top: 230px;
+  left: 155px;
+  top: 105px;
   right: auto;
-  width: 850px;
+  width: 790px;
   min-width: 0;
-  height: 230px;
+  height: 240px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
