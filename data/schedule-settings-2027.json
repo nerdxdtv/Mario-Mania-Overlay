@@ -1,3 +1,4 @@
+{
   "defaultSlotMinutes": 120,
   "scheduleRefreshInterval": 15000,
   "messagesRefreshInterval": 60000,
