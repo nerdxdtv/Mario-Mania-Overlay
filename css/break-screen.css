@@ -2,8 +2,9 @@
  * Mario Mania Marathon 2027
  * Break Screen Overlay
  *
- * Loaded after overlay.css so these rules affect only the break
- * screen and do not modify the completed gameplay overlays.
+ * Loaded after overlay.css and rotator-layouts.css so these rules
+ * affect only the break screen and do not modify the completed
+ * gameplay overlays.
  */
 
 .layout-break {
@@ -68,12 +69,6 @@
   user-select: none;
   will-change: background-position;
 }
-
-/*
- * Each layer uses its own native image dimensions but shares the
- * same bottom baseline. A linear infinite animation moves each
- * repeating background from right to left.
- */
 
 .layout-break .parallax-background {
   bottom: 0;
@@ -180,10 +175,6 @@
  * ------------------------------------------------------------
  * LIVE DONATION TOTAL
  * ------------------------------------------------------------
- *
- * The frame uses z-index 50. The total is a direct child of the
- * full overlay and uses z-index 70 so it sits above the frame and
- * overlaps the baked-in coin.
  */
 
 .layout-break .break-donation-total {
@@ -220,11 +211,17 @@
 
 /*
  * ------------------------------------------------------------
- * PRIZE PANEL
+ * PRIZE / FEATURE PANEL
  * ------------------------------------------------------------
+ *
+ * The two feature layers are reusable. They currently render prize
+ * images, but the same layers can later render a Coming Up schedule
+ * card without changing the panel structure.
  */
 
-.layout-break .break-prize-panel {
+.layout-break .break-feature-panel {
+  --feature-fade-duration: 1200ms;
+
   position: absolute;
   left: 10px;
   top: 481px;
@@ -235,44 +232,34 @@
   z-index: 1;
 }
 
-.layout-break .prize-image {
+.layout-break .feature-slide {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  display: block;
-  object-fit: contain;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   opacity: 0;
-  transition: opacity 600ms ease-in-out;
+  transition:
+    opacity
+    var(--feature-fade-duration)
+    ease-in-out;
   pointer-events: none;
-  user-select: none;
-  -webkit-user-drag: none;
 }
 
-.layout-break .prize-image.is-visible {
+.layout-break .feature-slide.is-visible {
   opacity: 1;
 }
 
-.layout-break .break-prize-panel::after {
-  content: "PRIZES";
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-family:
-    "MuseoSans900",
-    "Arial Black",
-    Arial,
-    Helvetica,
-    sans-serif;
-  font-size: 72px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  -webkit-text-stroke: 3px #000000;
-  paint-order: stroke fill;
+.layout-break .feature-prize-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
   pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 /*
@@ -366,9 +353,6 @@
  * ------------------------------------------------------------
  * ANIMATED TRIVIA GIF ROTATION
  * ------------------------------------------------------------
- *
- * Two image elements overlap. JavaScript alternates between them
- * so one GIF fades in while the previous GIF fades out.
  */
 
 .layout-break .break-trivia-panel {
@@ -390,10 +374,13 @@
   display: block;
   object-fit: contain;
   opacity: 0;
-
   filter:
-  drop-shadow(12px 16px 12px rgba(0, 0, 0, 0.55));
-  
+    drop-shadow(
+      12px
+      16px
+      12px
+      rgba(0, 0, 0, 0.55)
+    );
   transition: opacity 1200ms ease-in-out;
   pointer-events: none;
   user-select: none;
@@ -405,16 +392,7 @@
 }
 
 /*
- * The clock exists only because overlay.js expects the standard
- * element. It is not displayed on the break screen.
- */
-
-.layout-break .break-hidden {
-  display: none !important;
-}
-
-/*
- * Show the standard overlay clock above the break-screen frame.
+ * Show the standard shared clock above the break-screen frame.
  */
 
 .layout-break .event-clock {
@@ -426,16 +404,7 @@
     animation: none !important;
   }
 
-  .layout-break .trivia-slide {
-    transition: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .layout-break .donation-parallax-layer {
-    animation: none !important;
-  }
-
+  .layout-break .feature-slide,
   .layout-break .trivia-slide {
     transition: none;
   }
