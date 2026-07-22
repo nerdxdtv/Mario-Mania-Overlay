@@ -17,6 +17,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const triviaSlides = [
     "../assets/break/trivia/trivia-01.gif",
     "../assets/break/trivia/trivia-02.gif",
+    "../assets/break/trivia/trivia-03.gif",
+    "../assets/break/trivia/trivia-04.gif",
+    "../assets/break/trivia/trivia-05.gif",
+    "../assets/break/trivia/trivia-06.gif",
+    "../assets/break/trivia/trivia-07.gif",
+    "../assets/break/trivia/trivia-08.gif",
+    "../assets/break/trivia/trivia-09.gif",
+    "../assets/break/trivia/trivia-10.gif",
   ];
 
   /*
