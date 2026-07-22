@@ -1,6 +1,9 @@
 {
   "displaySeconds": 12,
   "fadeMilliseconds": 1200,
+  "scheduleEnabled": true,
+  "scheduleEvery": 2,
+  "scheduleDisplaySeconds": 15,
   "slides": [
     {
       "src": "../assets/break/prizes/prize-01.png",
