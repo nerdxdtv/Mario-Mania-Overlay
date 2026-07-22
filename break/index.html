@@ -18,7 +18,7 @@
   <!-- Break-screen-specific appearance and positioning -->
   <link
     rel="stylesheet"
-    href="../css/break-screen.css?v=1"
+    href="../css/break-screen.css?v=2"
   >
 
   <!-- Donation total, rotator, polls, milestones, and announcements -->
@@ -27,7 +27,7 @@
     defer
   ></script>
 
-  <!-- Break-screen parallax, prizes, and trivia -->
+  <!-- Break-screen prizes and future trivia behavior -->
   <script
     src="../js/break-screen.js?v=1"
     defer
@@ -49,29 +49,21 @@
         class="donation-parallax"
         aria-hidden="true"
       >
-        <img
+        <div
           class="donation-parallax-layer parallax-background"
-          src="../assets/break/parallax/background.png"
-          alt=""
-        >
+        ></div>
 
-        <img
+        <div
           class="donation-parallax-layer parallax-midground"
-          src="../assets/break/parallax/midground.png"
-          alt=""
-        >
+        ></div>
 
-        <img
+        <div
           class="donation-parallax-layer parallax-foreground"
-          src="../assets/break/parallax/foreground.png"
-          alt=""
-        >
+        ></div>
 
-        <img
+        <div
           class="donation-parallax-layer parallax-close-foreground"
-          src="../assets/break/parallax/close-foreground.png"
-          alt=""
-        >
+        ></div>
       </div>
 
       <div
@@ -138,44 +130,18 @@
       </article>
     </section>
 
-    <!-- Trivia question and answers -->
+    <!-- Reserved for future animated trivia GIFs -->
     <section
       class="break-trivia-panel"
       aria-label="Mario Mania trivia"
+      hidden
     >
-      <div
-        id="trivia-question"
-        class="trivia-question"
-        aria-live="polite"
+      <img
+        id="trivia-image"
+        class="trivia-image"
+        src=""
+        alt="Mario Mania trivia"
       >
-        Who is Mario's fraternal twin?
-      </div>
-
-      <div
-        id="trivia-answers"
-        class="trivia-answers"
-      >
-        <div
-          class="trivia-answer"
-          data-answer-index="0"
-        >
-          Wario
-        </div>
-
-        <div
-          class="trivia-answer"
-          data-answer-index="1"
-        >
-          Ralph
-        </div>
-
-        <div
-          class="trivia-answer"
-          data-answer-index="2"
-        >
-          Luigi
-        </div>
-      </div>
     </section>
 
     <!-- Static 1920 × 1080 break-screen artwork, including Mama Mia -->
