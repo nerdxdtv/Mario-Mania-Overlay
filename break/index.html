@@ -1,1 +1,201 @@
-//Test//
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Mario Mania Marathon 2027 — Break Screen Overlay</title>
+
+  <!-- Shared overlay appearance -->
+  <link
+    rel="stylesheet"
+    href="../css/overlay.css?v=12"
+  >
+
+  <!-- Break-screen-specific appearance and positioning -->
+  <link
+    rel="stylesheet"
+    href="../css/break-screen.css?v=1"
+  >
+
+  <!-- Donation total, rotator, polls, milestones, and announcements -->
+  <script
+    src="../js/overlay.js?v=11"
+    defer
+  ></script>
+
+  <!-- Break-screen parallax, prizes, and trivia -->
+  <script
+    src="../js/break-screen.js?v=1"
+    defer
+  ></script>
+</head>
+
+<body
+  class="layout-break"
+  data-rotator-set="break"
+>
+  <main class="overlay break-overlay">
+
+    <!-- Donation-total parallax area -->
+    <section
+      class="break-donation-panel"
+      aria-label="Current Mario Mania donation total"
+    >
+      <div
+        class="donation-parallax"
+        aria-hidden="true"
+      >
+        <img
+          class="donation-parallax-layer parallax-background"
+          src="../assets/break/parallax/background.png"
+          alt=""
+        >
+
+        <img
+          class="donation-parallax-layer parallax-midground"
+          src="../assets/break/parallax/midground.png"
+          alt=""
+        >
+
+        <img
+          class="donation-parallax-layer parallax-foreground"
+          src="../assets/break/parallax/foreground.png"
+          alt=""
+        >
+      </div>
+
+      <div
+        id="donation-total"
+        class="donation-total break-donation-total"
+        aria-live="polite"
+      >
+        $0.00
+      </div>
+    </section>
+
+    <!-- Prize image area -->
+    <section
+      class="break-prize-panel"
+      aria-label="Mario Mania prizes"
+    >
+      <img
+        id="prize-image"
+        class="prize-image"
+        src="../assets/break/prizes/prize-placeholder.png"
+        alt="Featured Mario Mania prize"
+      >
+    </section>
+
+    <!-- Informational images and Tiltify incentive cards -->
+    <section
+      class="info-rotator break-info-rotator"
+      aria-label="Mario Mania information and donation incentives"
+    >
+      <img
+        id="rotator-image"
+        class="rotator-image"
+        src="../assets/rotator/break/march-of-dimes.png"
+        alt="March of Dimes"
+      >
+
+      <article
+        id="incentive-card"
+        class="incentive-card"
+        aria-live="polite"
+        hidden
+      >
+        <div
+          id="incentive-label"
+          class="incentive-label"
+        >
+          DONATION POLL
+        </div>
+
+        <div
+          id="incentive-title"
+          class="incentive-title"
+        ></div>
+
+        <div
+          id="incentive-options"
+          class="incentive-options"
+        ></div>
+
+        <div
+          id="incentive-footer"
+          class="incentive-footer"
+        ></div>
+      </article>
+    </section>
+
+    <!-- Trivia question and answers -->
+    <section
+      class="break-trivia-panel"
+      aria-label="Mario Mania trivia"
+    >
+      <div
+        id="trivia-question"
+        class="trivia-question"
+        aria-live="polite"
+      >
+        Who is Mario's fraternal twin?
+      </div>
+
+      <div
+        id="trivia-answers"
+        class="trivia-answers"
+      >
+        <div
+          class="trivia-answer"
+          data-answer-index="0"
+        >
+          Wario
+        </div>
+
+        <div
+          class="trivia-answer"
+          data-answer-index="1"
+        >
+          Ralph
+        </div>
+
+        <div
+          class="trivia-answer"
+          data-answer-index="2"
+        >
+          Luigi
+        </div>
+      </div>
+    </section>
+
+    <!-- Mario Mania mascot -->
+    <img
+      id="mama-mia"
+      class="mama-mia"
+      src="../assets/break/mama-mia.png"
+      alt="Mama Mia, the Mario Mania mascot"
+    >
+
+    <!-- Static 1920 × 1080 break-screen artwork -->
+    <img
+      class="overlay-frame break-frame"
+      src="../assets/frames/mmm27-break.png"
+      alt=""
+    >
+
+    <!-- Retained for compatibility with the shared overlay script -->
+    <div
+      id="event-clock"
+      class="event-clock break-hidden"
+      aria-hidden="true"
+    >
+      LOADING...
+    </div>
+
+  </main>
+</body>
+</html>
