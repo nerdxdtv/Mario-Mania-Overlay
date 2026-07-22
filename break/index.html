@@ -18,7 +18,7 @@
   <!-- Break-screen-specific appearance and positioning -->
   <link
     rel="stylesheet"
-    href="../css/break-screen.css?v=3"
+    href="../css/break-screen.css?v=4"
   >
 
   <!-- Donation total, rotator, polls, milestones, and announcements -->
@@ -40,10 +40,10 @@
 >
   <main class="overlay break-overlay">
 
-    <!-- Donation-total parallax area -->
+    <!-- Donation parallax scene -->
     <section
       class="break-donation-panel"
-      aria-label="Current Mario Mania donation total"
+      aria-label="Mario Mania donation scenery"
     >
       <div
         class="donation-parallax"
@@ -64,14 +64,6 @@
         <div
           class="donation-parallax-layer parallax-close-foreground"
         ></div>
-      </div>
-
-      <div
-        id="donation-total"
-        class="donation-total break-donation-total"
-        aria-live="polite"
-      >
-        $0.00
       </div>
     </section>
 
@@ -150,6 +142,20 @@
       src="../assets/frames/mmm27-break.png"
       alt=""
     >
+
+    <!--
+      Direct child of break-overlay so it can render above the frame.
+      Keeping this inside break-donation-panel would trap it beneath
+      the panel's lower stacking context.
+    -->
+    <div
+      id="donation-total"
+      class="donation-total break-donation-total"
+      aria-live="polite"
+      aria-label="Current Mario Mania donation total"
+    >
+      $0.00
+    </div>
 
     <!-- Retained for compatibility with the shared overlay script -->
     <div
