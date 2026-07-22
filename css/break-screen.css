@@ -413,6 +413,24 @@
   display: none !important;
 }
 
+/*
+ * Show the standard overlay clock above the break-screen frame.
+ */
+
+.layout-break .event-clock {
+  z-index: 70;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout-break .donation-parallax-layer {
+    animation: none !important;
+  }
+
+  .layout-break .trivia-slide {
+    transition: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .layout-break .donation-parallax-layer {
     animation: none !important;
