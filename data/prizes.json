@@ -1,0 +1,22 @@
+{
+  "displaySeconds": 12,
+  "fadeMilliseconds": 1200,
+  "slides": [
+    {
+      "src": "../assets/break/prizes/prize-01.png",
+      "alt": "Mario Mania featured prize 1"
+    },
+    {
+      "src": "../assets/break/prizes/prize-02.png",
+      "alt": "Mario Mania featured prize 2"
+    },
+    {
+      "src": "../assets/break/prizes/prize-03.png",
+      "alt": "Mario Mania featured prize 3"
+    },
+    {
+      "src": "../assets/break/prizes/prize-04.png",
+      "alt": "Mario Mania featured prize 4"
+    }
+  ]
+}
