@@ -2,8 +2,8 @@
  * Mario Mania Marathon 2027
  * Break Screen Overlay
  *
- * This file is loaded after overlay.css, so these rules override
- * the shared gameplay-overlay positions only on the break screen.
+ * Loaded after overlay.css so these rules affect only the break
+ * screen and do not modify the completed gameplay overlays.
  */
 
 .layout-break {
@@ -39,9 +39,6 @@
  * ------------------------------------------------------------
  * DONATION PARALLAX PANEL
  * ------------------------------------------------------------
- *
- * The panel extends one pixel beneath the frame border so that
- * no transparent seam appears around the opening.
  */
 
 .layout-break .break-donation-panel {
@@ -63,132 +60,141 @@
 
 .layout-break .donation-parallax-layer {
   position: absolute;
-  bottom: 0;
-  display: block;
-  max-width: none;
-  height: auto;
+  left: 0;
+  width: 100%;
+  background-repeat: repeat-x;
+  background-position: 0 bottom;
   pointer-events: none;
   user-select: none;
-  -webkit-user-drag: none;
-  image-rendering: pixelated;
-  will-change: transform;
+  will-change: background-position;
 }
 
 /*
- * Each image keeps its native size and shares the same bottom
- * baseline. Adjust left, bottom, width, or animation distance
- * here when fine-tuning the layer alignment.
+ * Each layer uses its own native image dimensions but shares the
+ * same bottom baseline. The background image repeats horizontally,
+ * while a linear infinite animation moves it exactly one image
+ * width to create a seamless right-to-left scroll.
  */
 
 .layout-break .parallax-background {
-  left: 0;
   bottom: 0;
-  width: 989px;
+  height: 417px;
   z-index: 1;
+  background-image:
+    url("../assets/break/parallax/background.png");
+  background-size: 989px 417px;
   animation:
-    break-background-drift
-    54s
-    ease-in-out
-    infinite
-    alternate;
+    break-scroll-background
+    92s
+    linear
+    infinite;
 }
 
 .layout-break .parallax-midground {
-  left: 0;
   bottom: 0;
-  width: 984px;
+  height: 150px;
   z-index: 2;
+  background-image:
+    url("../assets/break/parallax/midground.png");
+  background-size: 984px 150px;
   animation:
-    break-midground-drift
-    38s
-    ease-in-out
-    infinite
-    alternate;
+    break-scroll-midground
+    58s
+    linear
+    infinite;
 }
 
 .layout-break .parallax-foreground {
-  left: 0;
   bottom: 0;
-  width: 985px;
+  height: 78px;
   z-index: 3;
+  background-image:
+    url("../assets/break/parallax/foreground.png");
+  background-size: 985px 78px;
   animation:
-    break-foreground-drift
-    27s
-    ease-in-out
-    infinite
-    alternate;
+    break-scroll-foreground
+    42s
+    linear
+    infinite;
 }
 
 .layout-break .parallax-close-foreground {
-  left: 0;
-  bottom: 0;
-  width: 2099px;
+  left: -8px;
+  bottom: -3px;
+  width: calc(100% + 16px);
+  height: 181px;
   z-index: 4;
+  background-image:
+    url("../assets/break/parallax/close-foreground.png");
+  background-size: 2099px 175px;
+  filter: blur(3px);
+  transform: scale(1.02);
+  transform-origin: center bottom;
   animation:
-    break-close-foreground-drift
-    21s
-    ease-in-out
-    infinite
-    alternate;
+    break-scroll-close-foreground
+    44s
+    linear
+    infinite;
 }
 
-@keyframes break-background-drift {
+@keyframes break-scroll-background {
   from {
-    transform: translateX(0);
+    background-position-x: 0;
   }
 
   to {
-    transform: translateX(-41px);
+    background-position-x: -989px;
   }
 }
 
-@keyframes break-midground-drift {
+@keyframes break-scroll-midground {
   from {
-    transform: translateX(0);
+    background-position-x: 0;
   }
 
   to {
-    transform: translateX(-36px);
+    background-position-x: -984px;
   }
 }
 
-@keyframes break-foreground-drift {
+@keyframes break-scroll-foreground {
   from {
-    transform: translateX(0);
+    background-position-x: 0;
   }
 
   to {
-    transform: translateX(-37px);
+    background-position-x: -985px;
   }
 }
 
-@keyframes break-close-foreground-drift {
+@keyframes break-scroll-close-foreground {
   from {
-    transform: translateX(0);
+    background-position-x: 0;
   }
 
   to {
-    transform: translateX(-736px);
+    background-position-x: -2099px;
   }
 }
 
 /*
  * Live Tiltify donation total.
  *
- * The coin is baked into the frame, so the text begins to its
- * right and remains centered in the remaining panel space.
+ * The text begins over the right side of the baked-in coin and is
+ * larger than the first visual pass.
  */
 
 .layout-break .break-donation-total {
   position: absolute;
-  left: 175px;
-  top: 118px;
-  width: 745px;
+  left: 120px;
+  top: 103px;
+  right: 16px;
+  width: auto;
   min-width: 0;
-  height: 165px;
+  height: 190px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   color: #ffffff;
   font-family:
     "MuseoSans900",
@@ -196,16 +202,16 @@
     Arial,
     Helvetica,
     sans-serif;
-  font-size: 112px;
+  font-size: 132px;
   font-weight: 900;
   line-height: 1;
-  letter-spacing: -5px;
+  letter-spacing: -7px;
   white-space: nowrap;
-  -webkit-text-stroke: 7px #000000;
+  -webkit-text-stroke: 8px #000000;
   paint-order: stroke fill;
   text-shadow:
-    5px 5px 0 #000000,
-    8px 8px 0 rgba(0, 0, 0, 0.45);
+    6px 6px 0 #000000,
+    10px 10px 0 rgba(0, 0, 0, 0.42);
   z-index: 6;
 }
 
@@ -270,9 +276,6 @@
  * ------------------------------------------------------------
  * BREAK-SCREEN ROTATOR
  * ------------------------------------------------------------
- *
- * The uploaded break rotator images are 947 x 167 and fit the
- * bottom-left frame opening at their native size.
  */
 
 .layout-break .break-info-rotator {
@@ -291,11 +294,6 @@
   display: block;
   object-fit: cover;
 }
-
-/*
- * Slightly enlarge the shared incentive styling for the taller
- * break-screen rotator without altering any shared CSS.
- */
 
 .layout-break .break-info-rotator .incentive-card {
   padding: 8px 16px 10px;
@@ -363,91 +361,29 @@
 
 /*
  * ------------------------------------------------------------
- * INITIAL TRIVIA PLACEHOLDER
+ * FUTURE TRIVIA GIF AREA
  * ------------------------------------------------------------
  *
- * This establishes the right-side region. The trivia animation
- * and JSON data will be built in a later step.
+ * The placeholder is intentionally hidden until the trivia GIF
+ * assets and rotation behavior are ready.
  */
 
 .layout-break .break-trivia-panel {
+  display: none;
   position: absolute;
-  left: 1035px;
-  top: 125px;
-  width: 405px;
-  color: #171717;
-  font-family:
-    "MuseoSans900",
-    "Arial Black",
-    Arial,
-    Helvetica,
-    sans-serif;
+  left: 1010px;
+  top: 95px;
+  width: 480px;
+  height: 820px;
+  overflow: hidden;
   z-index: 60;
 }
 
-.layout-break .trivia-question {
-  box-sizing: border-box;
-  min-height: 250px;
-  padding: 45px 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #ffd400;
-  border: 12px solid #161d17;
-  outline: 8px solid #ffffff;
-  font-size: 36px;
-  font-weight: 900;
-  line-height: 1.18;
-  text-align: center;
-  clip-path:
-    polygon(
-      14% 0,
-      86% 0,
-      100% 18%,
-      100% 82%,
-      86% 100%,
-      14% 100%,
-      0 82%,
-      0 18%
-    );
-}
-
-.layout-break .trivia-answers {
-  margin-top: 50px;
-  display: grid;
-  gap: 20px;
-}
-
-.layout-break .trivia-answer {
-  min-height: 72px;
-  padding: 0 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #171717;
-  background: #ffd400;
-  border: 9px solid #161d17;
-  outline: 5px solid #ffffff;
-  font-size: 30px;
-  font-weight: 900;
-  line-height: 1;
-  text-align: center;
-  clip-path:
-    polygon(
-      10% 0,
-      90% 0,
-      100% 28%,
-      100% 72%,
-      90% 100%,
-      10% 100%,
-      0 72%,
-      0 28%
-    );
-}
-
-.layout-break .trivia-answer.is-correct {
-  color: #ffffff;
-  background: #ff3524;
+.layout-break .trivia-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
 }
 
 /*
@@ -458,11 +394,6 @@
 .layout-break .break-hidden {
   display: none !important;
 }
-
-/*
- * Prevent movement for viewers or systems requesting reduced
- * motion. OBS normally uses the animated version.
- */
 
 @media (prefers-reduced-motion: reduce) {
   .layout-break .donation-parallax-layer {
