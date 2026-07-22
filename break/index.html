@@ -9,13 +9,13 @@
 
   <title>Mario Mania Marathon 2027 — Break Screen Overlay</title>
 
-    <!-- Shared overlay appearance -->
+  <!-- Shared overlay appearance -->
   <link
     rel="stylesheet"
     href="../css/overlay.css?v=12"
   >
 
-  <!-- Shared black background and animated scanline effect -->
+  <!-- Shared rotator background and scanline treatment -->
   <link
     rel="stylesheet"
     href="../css/rotator-layouts.css?v=7"
@@ -26,16 +26,16 @@
     rel="stylesheet"
     href="../css/break-screen.css?v=11"
   >
-  
+
   <!-- Donation total, rotator, polls, milestones, and announcements -->
   <script
     src="../js/overlay.js?v=11"
     defer
   ></script>
 
-  <!-- Break-screen trivia rotation and future prize behavior -->
+  <!-- Break-screen prize and trivia rotation -->
   <script
-    src="../js/break-screen.js?v=4"
+    src="../js/break-screen.js?v=5"
     defer
   ></script>
 </head>
@@ -73,17 +73,26 @@
       </div>
     </section>
 
-    <!-- Prize image area -->
+    <!--
+      Reusable feature panel.
+      It currently displays prize images and is structured so schedule
+      cards can be added to this same rotation later.
+    -->
     <section
-      class="break-prize-panel"
-      aria-label="Mario Mania prizes"
+      id="break-feature-panel"
+      class="break-prize-panel break-feature-panel"
+      aria-label="Mario Mania prizes and event information"
+      aria-live="polite"
     >
-      <img
-        id="prize-image"
-        class="prize-image"
-        src="../assets/break/prizes/prize-placeholder.png"
-        alt="Featured Mario Mania prize"
-      >
+      <div
+        id="feature-slide-a"
+        class="feature-slide"
+      ></div>
+
+      <div
+        id="feature-slide-b"
+        class="feature-slide"
+      ></div>
     </section>
 
     <!-- Informational images and Tiltify incentive cards -->
@@ -154,8 +163,8 @@
     >
 
     <!--
-      This must remain a direct child of break-overlay so it can
-      render above the frame and overlap the baked-in coin.
+      This remains a direct child of break-overlay so it can render
+      above the frame and overlap the baked-in coin.
     -->
     <div
       id="donation-total"
@@ -173,7 +182,7 @@
       aria-label="Current Eastern date and time"
     >
       LOADING...
-</div>
+    </div>
 
   </main>
 </body>
