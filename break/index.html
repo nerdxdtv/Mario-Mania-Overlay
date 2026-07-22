@@ -18,7 +18,7 @@
   <!-- Break-screen-specific appearance and positioning -->
   <link
     rel="stylesheet"
-    href="../css/break-screen.css?v=9"
+    href="../css/break-screen.css?v=6"
   >
 
   <!-- Donation total, rotator, polls, milestones, and announcements -->
@@ -27,9 +27,9 @@
     defer
   ></script>
 
-  <!-- Break-screen prizes and future trivia behavior -->
+  <!-- Break-screen trivia rotation and future prize behavior -->
   <script
-    src="../js/break-screen.js?v=1"
+    src="../js/break-screen.js?v=3"
     defer
   ></script>
 </head>
@@ -122,17 +122,21 @@
       </article>
     </section>
 
-    <!-- Reserved for future animated trivia GIFs -->
+    <!-- Animated trivia GIF rotation -->
     <section
       class="break-trivia-panel"
       aria-label="Mario Mania trivia"
-      hidden
     >
       <img
-        id="trivia-image"
-        class="trivia-image"
-        src=""
-        alt="Mario Mania trivia"
+        id="trivia-slide-a"
+        class="trivia-slide"
+        alt="Mario Mania trivia question"
+      >
+
+      <img
+        id="trivia-slide-b"
+        class="trivia-slide"
+        alt="Mario Mania trivia question"
       >
     </section>
 
@@ -144,9 +148,8 @@
     >
 
     <!--
-      Direct child of break-overlay so it can render above the frame.
-      Keeping this inside break-donation-panel would trap it beneath
-      the panel's lower stacking context.
+      This must remain a direct child of break-overlay so it can
+      render above the frame and overlap the baked-in coin.
     -->
     <div
       id="donation-total"
